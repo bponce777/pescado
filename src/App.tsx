@@ -23,10 +23,12 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Toaster, toast } from 'sonner'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { supabase } from '@/lib/supabase'
+import { FishLoader } from '@/components/FishLoader'
 
 type Dish = {
   id: number
@@ -673,6 +675,8 @@ function VentasPage() {
 
 function PlatosPage() {
   const [dishes, setDishes] = useState<Dish[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingDish, setEditingDish] = useState<Dish | null>(null)
   const [formData, setFormData] = useState({
     name: '',
@@ -685,6 +689,7 @@ function PlatosPage() {
   }, [])
 
   const loadDishes = async () => {
+    setIsLoading(true)
     const { data, error } = await supabase
       .from('dishes')
       .select('*')
@@ -693,10 +698,12 @@ function PlatosPage() {
     if (error) {
       console.error('Error loading dishes:', error)
       toast.error('Error al cargar platos')
+      setIsLoading(false)
       return
     }
 
     setDishes(data || [])
+    setIsLoading(false)
   }
 
   const handleAddDish = async () => {
@@ -749,6 +756,8 @@ function PlatosPage() {
     }
 
     setFormData({ name: '', price: '', description: '' })
+    setIsDialogOpen(false)
+    setEditingDish(null)
     loadDishes()
   }
 
@@ -759,6 +768,7 @@ function PlatosPage() {
       price: dish.price.toString(),
       description: dish.description
     })
+    setIsDialogOpen(true)
   }
 
   const handleToggleActive = async (dish: Dish) => {
@@ -798,140 +808,176 @@ function PlatosPage() {
   const cancelEdit = () => {
     setEditingDish(null)
     setFormData({ name: '', price: '', description: '' })
+    setIsDialogOpen(false)
+  }
+
+  if (isLoading) {
+    return <FishLoader text="Cargando platos..." />
   }
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto px-4 md:px-0">
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight">Gestión de Platos</h2>
-        <p className="text-muted-foreground">
-          Administra los platos disponibles
-        </p>
-      </div>
+    <div className="space-y-6 px-4 md:px-0">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">Gestión de Platos</h2>
+          <p className="text-muted-foreground">
+            Administra los platos disponibles
+          </p>
+        </div>
 
-      <div className="grid gap-6 lg:grid-cols-[400px_1fr]">
-        <Card>
-          <CardHeader>
-            <CardTitle>{editingDish ? 'Editar Plato' : 'Nuevo Plato'}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="dish-name">
-                Nombre <span className="text-destructive">*</span>
-              </Label>
-              <Input
-                id="dish-name"
-                placeholder="Ej: Pescado frito"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              />
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button size="lg" onClick={() => { setEditingDish(null); setFormData({ name: '', price: '', description: '' }); }}>
+              <Plus className="h-5 w-5" />
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{editingDish ? 'Editar Plato' : 'Nuevo Plato'}</DialogTitle>
+              <DialogDescription>
+                {editingDish ? 'Modifica los datos del plato' : 'Completa los datos para agregar un nuevo plato'}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="dish-name">
+                  Nombre <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="dish-name"
+                  placeholder="Ej: Pescado frito"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="dish-price">
+                  Precio <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="dish-price"
+                  type="number"
+                  placeholder="15000"
+                  value={formData.price}
+                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="dish-description">Descripción</Label>
+                <Input
+                  id="dish-description"
+                  placeholder="Descripción del plato"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                />
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="dish-price">
-                Precio <span className="text-destructive">*</span>
-              </Label>
-              <Input
-                id="dish-price"
-                type="number"
-                placeholder="15000"
-                value={formData.price}
-                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="dish-description">Descripción</Label>
-              <Input
-                id="dish-description"
-                placeholder="Descripción del plato"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              />
-            </div>
-
-            <div className="flex gap-2">
-              <Button onClick={handleAddDish} className="flex-1">
+            <DialogFooter>
+              <Button variant="outline" onClick={cancelEdit}>
+                Cancelar
+              </Button>
+              <Button onClick={handleAddDish}>
                 {editingDish ? 'Actualizar' : 'Agregar'}
               </Button>
-              {editingDish && (
-                <Button onClick={cancelEdit} variant="outline">
-                  Cancelar
-                </Button>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Platos Registrados</CardTitle>
-            <CardDescription>
-              {dishes.filter(d => d.active).length} platos activos
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {dishes.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">
-                No hay platos registrados
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {dishes.map((dish) => (
-                  <div
-                    key={dish.id}
-                    className={`flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-4 border rounded-lg ${
-                      !dish.active ? 'opacity-50' : ''
-                    }`}
-                  >
-                    <div className="flex items-start gap-3 flex-1 min-w-0">
-                      <div className="text-3xl flex-shrink-0">🐟</div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-lg truncate">{dish.name}</h3>
-                        <p className="text-sm text-muted-foreground line-clamp-2">{dish.description}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <p className="text-lg font-bold text-primary">
-                            ${dish.price.toLocaleString('es-CO')}
-                          </p>
-                          <Badge variant={dish.active ? 'default' : 'secondary'} className="ml-auto md:hidden">
-                            {dish.active ? 'Activo' : 'Inactivo'}
-                          </Badge>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 flex-wrap md:flex-nowrap">
-                      <Badge variant={dish.active ? 'default' : 'secondary'} className="hidden md:inline-flex">
-                        {dish.active ? 'Activo' : 'Inactivo'}
-                      </Badge>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleEdit(dish)}
-                      >
-                        Editar
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleToggleActive(dish)}
-                      >
-                        {dish.active ? 'Desactivar' : 'Activar'}
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDelete(dish)}
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Platos Registrados</CardTitle>
+          <CardDescription>
+            {dishes.filter(d => d.active).length} platos activos de {dishes.length} totales
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {dishes.length === 0 ? (
+            <div className="text-center py-16">
+              <UtensilsCrossed className="mx-auto h-16 w-16 text-muted-foreground/50 mb-4" />
+              <h3 className="text-lg font-semibold mb-2">No hay platos registrados</h3>
+              <p className="text-muted-foreground mb-4">
+                Comienza agregando tu primer plato
+              </p>
+              <Button onClick={() => setIsDialogOpen(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                Agregar Plato
+              </Button>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nombre</TableHead>
+                    <TableHead>Descripción</TableHead>
+                    <TableHead className="text-right">Precio</TableHead>
+                    <TableHead className="text-center">Estado</TableHead>
+                    <TableHead className="text-right">Acciones</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {dishes.map((dish) => (
+                    <TableRow key={dish.id} className={!dish.active ? 'opacity-50' : ''}>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xl">🐟</span>
+                          <span className="font-medium">{dish.name}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-sm text-muted-foreground">
+                          {dish.description || '-'}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <span className="font-bold text-primary">
+                          ${dish.price.toLocaleString('es-CO')}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Badge variant={dish.active ? 'default' : 'secondary'}>
+                          {dish.active ? 'Activo' : 'Inactivo'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEdit(dish)}
+                          >
+                            Editar
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleToggleActive(dish)}
+                          >
+                            {dish.active ? 'Desactivar' : 'Activar'}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDelete(dish)}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                            <span className="sr-only">Eliminar</span>
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   )
 }
