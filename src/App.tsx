@@ -215,14 +215,12 @@ function HomePage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-          <p className="text-muted-foreground">
-            Bienvenido a Deisy&Brian
-          </p>
-        </div>
-        <Button onClick={generatePDF} size="lg">
+      <div>
+        <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+        <p className="text-muted-foreground">
+          Bienvenido a Deisy&Brian
+        </p>
+        <Button onClick={generatePDF} size="lg" className="mt-4">
           <FileDown className="mr-2 h-5 w-5" />
           Descargar PDF
         </Button>
