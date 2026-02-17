@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, useNavigate, useParams } from 'react-router-dom'
-import { Home, ShoppingCart, History, Menu, DollarSign, TrendingUp, Plus, Minus, Trash2, User, Eye, Banknote, FileDown, UtensilsCrossed, Filter, MoreVertical, Edit, Power } from 'lucide-react'
+import { Home, ShoppingCart, History, Menu, DollarSign, TrendingUp, Plus, Minus, Trash2, User, Eye, Banknote, FileDown, UtensilsCrossed, Filter, MoreVertical, Edit, Power, FileText } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -33,6 +33,7 @@ function AppSidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
     { href: '/', icon: Home, label: 'Dashboard' },
     { href: '/ventas', icon: ShoppingCart, label: 'Nueva Venta' },
     { href: '/historial', icon: History, label: 'Historial' },
+    { href: '/reportes', icon: FileText, label: 'Reportes' },
     { href: '/platos', icon: UtensilsCrossed, label: 'Platos' },
   ]
 
@@ -1308,6 +1309,286 @@ function HistorialPage() {
   )
 }
 
+function ReportesPage() {
+  const [sales, setSales] = useState<any[]>([])
+  const [filterStatus, setFilterStatus] = useState<string>('all')
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    loadSales()
+  }, [])
+
+  const loadSales = async () => {
+    setIsLoading(true)
+    const { data, error } = await supabase
+      .from('sales')
+      .select('*')
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      console.error('Error loading sales:', error)
+      toast.error('Error al cargar ventas')
+      setIsLoading(false)
+      return
+    }
+
+    setSales(data || [])
+    setIsLoading(false)
+  }
+
+  const filteredSales = sales.filter(sale => {
+    if (filterStatus === 'all') return true
+    if (filterStatus === 'paid') return sale.balance === 0
+    if (filterStatus === 'partial') return sale.paid > 0 && sale.balance > 0
+    if (filterStatus === 'pending') return sale.paid === 0
+    return true
+  })
+
+  const generateFilteredPDF = async () => {
+    if (filteredSales.length === 0) {
+      toast.error('No hay ventas para exportar con este filtro')
+      return
+    }
+
+    const doc = new jsPDF({
+      putOnlyUsedFonts: true,
+      compress: true
+    })
+
+    doc.setLanguage('es')
+
+    // Título
+    doc.setFontSize(20)
+    doc.text('Deisy&Brian', 14, 20)
+    doc.setFontSize(12)
+    doc.text('Reporte de Ventas', 14, 28)
+
+    // Filtro aplicado
+    const filterLabel = filterStatus === 'all' ? 'Todas' :
+                        filterStatus === 'paid' ? 'Pagadas' :
+                        filterStatus === 'partial' ? 'Pago Parcial' : 'Pendientes'
+    doc.setFontSize(10)
+    doc.text(`Filtro: ${filterLabel}`, 14, 35)
+    doc.text(`Generado: ${new Date().toLocaleString('es-CO')}`, 14, 42)
+
+    // Estadísticas
+    const totalVentas = filteredSales.length
+    const totalIngresos = filteredSales.reduce((sum: number, s: any) => sum + s.total, 0)
+    const totalPagado = filteredSales.reduce((sum: number, s: any) => sum + s.paid, 0)
+    const totalPendiente = filteredSales.reduce((sum: number, s: any) => sum + s.balance, 0)
+
+    doc.setFontSize(11)
+    doc.text(`Total Ventas: ${totalVentas}`, 14, 52)
+    doc.text(`Total Ingresos: $${totalIngresos.toLocaleString('es-CO')}`, 14, 59)
+    doc.text(`Total Pagado: $${totalPagado.toLocaleString('es-CO')}`, 14, 66)
+    doc.text(`Total Pendiente: $${totalPendiente.toLocaleString('es-CO')}`, 14, 73)
+
+    // Tabla de ventas
+    const tableData = filteredSales.map((sale: any) => [
+      sale.customer_name || '',
+      sale.product || '',
+      sale.quantity.toString(),
+      `$${sale.total.toLocaleString('es-CO')}`,
+      `$${sale.paid.toLocaleString('es-CO')}`,
+      `$${sale.balance.toLocaleString('es-CO')}`,
+      new Date(sale.created_at).toLocaleDateString('es-CO')
+    ])
+
+    autoTable(doc, {
+      startY: 82,
+      head: [['Cliente', 'Producto', 'Cant.', 'Total', 'Pagado', 'Saldo', 'Fecha']],
+      body: tableData,
+      theme: 'grid',
+      headStyles: { fillColor: [59, 130, 246] },
+      styles: {
+        fontSize: 9,
+        font: 'helvetica',
+        fontStyle: 'normal'
+      },
+      didParseCell: function(data) {
+        if (data.cell.raw) {
+          data.cell.text = [String(data.cell.raw)]
+        }
+      }
+    })
+
+    const fileName = `reporte-${filterLabel.toLowerCase().replace(' ', '-')}-${Date.now()}.pdf`
+    doc.save(fileName)
+    toast.success('Reporte descargado exitosamente')
+  }
+
+  const totalIngresos = filteredSales.reduce((sum, sale) => sum + sale.total, 0)
+  const totalPendiente = filteredSales.reduce((sum, sale) => sum + sale.balance, 0)
+
+  if (isLoading) {
+    return <FishLoader text="Cargando reportes..." />
+  }
+
+  return (
+    <div className="space-y-6 sm:space-y-8">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">Reportes</h1>
+          <p className="mt-1 text-sm text-muted-foreground sm:mt-2 sm:text-base">
+            Genera reportes detallados de ventas
+          </p>
+        </div>
+        <Button onClick={generateFilteredPDF} size="lg" className="w-full sm:w-auto">
+          <FileDown className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+          Descargar PDF
+        </Button>
+      </div>
+
+      {/* Filtros */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <div className="flex items-center gap-3">
+                <Filter className="h-5 w-5 text-muted-foreground" />
+                <label className="text-sm font-medium">Filtrar por estado:</label>
+              </div>
+              <Select value={filterStatus} onValueChange={setFilterStatus}>
+                <SelectTrigger className="w-full sm:w-[200px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="paid">Pagado</SelectItem>
+                  <SelectItem value="partial">Pago Parcial</SelectItem>
+                  <SelectItem value="pending">Pendiente</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <span className="text-sm text-muted-foreground">
+              {filteredSales.length} de {sales.length} ventas
+            </span>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Estadísticas */}
+      <div className="grid gap-4 sm:gap-6 md:grid-cols-3">
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium">Total Ventas</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold sm:text-3xl">{filteredSales.length}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {filterStatus !== 'all' ? 'Filtradas' : 'Totales'}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium">Total Ingresos</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-primary sm:text-3xl">
+              ${totalIngresos.toLocaleString('es-CO')}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Monto total
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium">Saldo Pendiente</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-orange-500 sm:text-3xl">
+              ${totalPendiente.toLocaleString('es-CO')}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Por cobrar
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Tabla de Ventas */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Listado de Ventas</CardTitle>
+          <CardDescription>
+            {filterStatus === 'all' ? 'Todas las ventas registradas' :
+             filterStatus === 'paid' ? 'Ventas completamente pagadas' :
+             filterStatus === 'partial' ? 'Ventas con pago parcial' :
+             'Ventas pendientes de pago'}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {filteredSales.length === 0 ? (
+            <div className="text-center py-12">
+              <Filter className="mx-auto h-12 w-12 text-muted-foreground/50 mb-3" />
+              <p className="text-sm text-muted-foreground">
+                No hay ventas con este filtro
+              </p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Cliente</TableHead>
+                    <TableHead>Producto</TableHead>
+                    <TableHead className="text-center">Cant.</TableHead>
+                    <TableHead className="text-right">Total</TableHead>
+                    <TableHead className="text-right">Pagado</TableHead>
+                    <TableHead className="text-right">Saldo</TableHead>
+                    <TableHead className="text-center">Estado</TableHead>
+                    <TableHead>Fecha</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredSales.map((sale) => (
+                    <TableRow key={sale.id}>
+                      <TableCell className="font-medium">{sale.customer_name}</TableCell>
+                      <TableCell>{sale.product}</TableCell>
+                      <TableCell className="text-center">
+                        <Badge variant="secondary">{sale.quantity}</Badge>
+                      </TableCell>
+                      <TableCell className="text-right font-bold">
+                        ${sale.total.toLocaleString('es-CO')}
+                      </TableCell>
+                      <TableCell className="text-right text-green-600">
+                        ${sale.paid.toLocaleString('es-CO')}
+                      </TableCell>
+                      <TableCell className="text-right text-orange-500">
+                        ${sale.balance.toLocaleString('es-CO')}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Badge
+                          variant={
+                            sale.balance === 0 ? 'default' :
+                            sale.paid > 0 ? 'secondary' :
+                            'outline'
+                          }
+                        >
+                          {sale.balance === 0 ? 'Pagado' :
+                           sale.paid > 0 ? 'Parcial' :
+                           'Pendiente'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {new Date(sale.created_at).toLocaleDateString('es-CO')}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
 function DetalleVentaPage() {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -1665,6 +1946,7 @@ function App() {
                 <Route path="/" element={<HomePage />} />
                 <Route path="/ventas" element={<VentasPage />} />
                 <Route path="/historial" element={<HistorialPage />} />
+                <Route path="/reportes" element={<ReportesPage />} />
                 <Route path="/platos" element={<PlatosPage />} />
                 <Route path="/venta/:id" element={<DetalleVentaPage />} />
               </Routes>
