@@ -59,7 +59,7 @@ function AppSidebar() {
                   🐟
                 </div>
                 <div className="flex flex-col gap-0.5 leading-none">
-                  <span className="font-bold text-lg">Es Pescado</span>
+                  <span className="font-bold text-lg">Deisy&Brian</span>
                   <span className="text-xs text-muted-foreground font-medium">Sistema de Ventas</span>
                 </div>
               </a>
@@ -105,7 +105,7 @@ function AppSidebar() {
             <span>Sistema Activo</span>
           </div>
           <span className="text-xs text-muted-foreground font-medium">
-            © 2026 Es Pescado
+            © 2026 Deisy&Brian
           </span>
         </div>
       </SidebarFooter>
@@ -134,7 +134,7 @@ async function generatePDF() {
 
   // Título
   doc.setFontSize(20)
-  doc.text('🐟 Es Pescado', 14, 20)
+  doc.text('🐟 Deisy&Brian', 14, 20)
   doc.setFontSize(12)
   doc.text('Reporte de Ventas', 14, 28)
   doc.setFontSize(10)
@@ -219,7 +219,7 @@ function HomePage() {
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
           <p className="text-muted-foreground">
-            Bienvenido a Es Pescado
+            Bienvenido a Deisy&Brian
           </p>
         </div>
         <Button onClick={generatePDF} size="lg" className="w-full md:w-auto">
@@ -1000,7 +1000,7 @@ function HistorialPage() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">
-            Deisy&Brian
+            Historial de Ventas
           </h2>
           <p className="text-muted-foreground">
             Registro de todas las ventas
@@ -1479,7 +1479,7 @@ function App() {
                 </Button>
               </SidebarTrigger>
               <Separator orientation="vertical" className="h-6" />
-              <h1 className="text-xl font-semibold">🐟 Es Pescado</h1>
+              <h1 className="text-xl font-semibold">🐟 Deisy&Brian</h1>
             </header>
             <main className="flex-1 overflow-auto">
               <div className="p-4 md:p-6">
