@@ -4,38 +4,64 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-
-type Sale = {
-  id: number
-  product: string
-  quantity: number
-  price: number
-  total: number
-  customerName?: string
-  notes?: string
-  date: string
-}
+import { supabase } from '@/lib/supabase'
+import { toast } from 'sonner'
 
 export function Historial() {
-  const [sales, setSales] = useState<Sale[]>([])
+  const [sales, setSales] = useState<any[]>([])
 
   useEffect(() => {
-    const storedSales = JSON.parse(localStorage.getItem('sales') || '[]')
-    setSales(storedSales)
+    loadSales()
   }, [])
 
-  const handleDeleteSale = (id: number) => {
-    if (!confirm('¿Estás seguro de eliminar esta venta?')) return
+  const loadSales = async () => {
+    const { data, error } = await supabase
+      .from('sales')
+      .select('*')
+      .order('created_at', { ascending: false })
 
-    const updatedSales = sales.filter(sale => sale.id !== id)
-    localStorage.setItem('sales', JSON.stringify(updatedSales))
-    setSales(updatedSales)
+    if (error) {
+      console.error('Error loading sales:', error)
+      toast.error('Error al cargar ventas')
+      return
+    }
+
+    setSales(data || [])
   }
 
-  const handleClearAll = () => {
+  const handleDeleteSale = async (id: number) => {
+    if (!confirm('¿Estás seguro de eliminar esta venta?')) return
+
+    const { error } = await supabase
+      .from('sales')
+      .delete()
+      .eq('id', id)
+
+    if (error) {
+      console.error('Error deleting sale:', error)
+      toast.error('Error al eliminar venta')
+      return
+    }
+
+    toast.success('Venta eliminada')
+    loadSales()
+  }
+
+  const handleClearAll = async () => {
     if (!confirm('¿Estás seguro de eliminar TODAS las ventas? Esta acción no se puede deshacer.')) return
 
-    localStorage.removeItem('sales')
+    const { error } = await supabase
+      .from('sales')
+      .delete()
+      .neq('id', 0) // Delete all rows
+
+    if (error) {
+      console.error('Error clearing sales:', error)
+      toast.error('Error al eliminar ventas')
+      return
+    }
+
+    toast.success('Todas las ventas eliminadas')
     setSales([])
   }
 
@@ -173,13 +199,13 @@ export function Historial() {
                       <TableCell>
                         <div className="flex items-center gap-1.5">
                           <User className="h-3.5 w-3.5 text-muted-foreground" />
-                          <span className="text-sm">{sale.customerName || 'Cliente General'}</span>
+                          <span className="text-sm">{sale.customer_name || 'Cliente General'}</span>
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                           <Calendar className="h-3.5 w-3.5" />
-                          {new Date(sale.date).toLocaleString('es-CO', {
+                          {new Date(sale.created_at).toLocaleString('es-CO', {
                             day: '2-digit',
                             month: '2-digit',
                             year: 'numeric',

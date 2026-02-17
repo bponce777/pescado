@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
-import { DollarSign, ShoppingCart, TrendingUp, Package } from 'lucide-react'
+import { DollarSign, ShoppingCart, TrendingUp, Package, History } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useNavigate } from 'react-router-dom'
+import { supabase } from '@/lib/supabase'
+import { toast } from 'sonner'
 
 const DEFAULT_PRODUCT = {
   name: 'Pescado con arroz',
@@ -21,17 +23,30 @@ export function Home() {
   })
 
   useEffect(() => {
-    const sales = JSON.parse(localStorage.getItem('sales') || '[]')
-    const today = new Date().toDateString()
-    const todaySales = sales.filter((sale: { date: string }) =>
-      new Date(sale.date).toDateString() === today
-    )
+    const loadStats = async () => {
+      const { data: sales, error } = await supabase
+        .from('sales')
+        .select('*')
 
-    setStats({
-      totalSales: sales.length,
-      totalRevenue: sales.reduce((sum: number, sale: { total: number }) => sum + sale.total, 0),
-      todaySales: todaySales.length
-    })
+      if (error) {
+        console.error('Error loading stats:', error)
+        toast.error('Error al cargar estadísticas')
+        return
+      }
+
+      const today = new Date().toDateString()
+      const todaySales = sales?.filter((sale: any) =>
+        new Date(sale.created_at).toDateString() === today
+      ) || []
+
+      setStats({
+        totalSales: sales?.length || 0,
+        totalRevenue: sales?.reduce((sum: number, sale: any) => sum + sale.total, 0) || 0,
+        todaySales: todaySales.length
+      })
+    }
+
+    loadStats()
   }, [])
 
   return (

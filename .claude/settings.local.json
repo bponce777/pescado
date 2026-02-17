@@ -19,7 +19,8 @@
       "Bash(.gitignore:*)",
       "Bash(else)",
       "Bash(fi)",
-      "Bash(SUPABASE_SETUP.md:*)"
+      "Bash(SUPABASE_SETUP.md:*)",
+      "Bash(npm run build)"
     ]
   },
   "enableAllProjectMcpServers": true,

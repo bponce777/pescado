@@ -28,43 +28,12 @@ import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { supabase } from '@/lib/supabase'
 
-const DEFAULT_DISHES = [
-  {
-    id: 1,
-    name: 'Pescado con arroz',
-    price: 15000,
-    description: 'Plato especial del día',
-    active: true
-  }
-]
-
 type Dish = {
   id: number
   name: string
   price: number
   description: string
   active: boolean
-}
-
-type Sale = {
-  id: number
-  product: string
-  quantity: number
-  price: number
-  total: number
-  paid: number
-  balance: number
-  customerName: string
-  notes?: string
-  date: string
-  payments: Payment[]
-}
-
-type Payment = {
-  id: number
-  amount: number
-  date: string
-  note?: string
 }
 
 function AppSidebar() {

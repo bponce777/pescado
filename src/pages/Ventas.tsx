@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ShoppingCart, Package, Plus, Minus } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -6,47 +6,77 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { useNavigate } from 'react-router-dom'
-
-const DEFAULT_PRODUCT = {
-  name: 'Pescado con arroz',
-  price: 15000,
-  description: 'Plato especial del día'
-}
+import { supabase } from '@/lib/supabase'
+import { toast } from 'sonner'
 
 export function Ventas() {
   const navigate = useNavigate()
   const [quantity, setQuantity] = useState(1)
   const [customerName, setCustomerName] = useState('')
   const [notes, setNotes] = useState('')
+  const [defaultDish, setDefaultDish] = useState<any>(null)
 
-  const handleAddSale = () => {
-    if (quantity <= 0) return
+  useEffect(() => {
+    const loadDefaultDish = async () => {
+      const { data, error } = await supabase
+        .from('dishes')
+        .select('*')
+        .eq('name', 'Pescado con arroz')
+        .eq('active', true)
+        .single()
 
-    const sales = JSON.parse(localStorage.getItem('sales') || '[]')
-    const newSale = {
-      id: Date.now(),
-      product: DEFAULT_PRODUCT.name,
-      quantity,
-      price: DEFAULT_PRODUCT.price,
-      total: quantity * DEFAULT_PRODUCT.price,
-      customerName: customerName || 'Cliente General',
-      notes,
-      date: new Date().toISOString()
+      if (error) {
+        console.error('Error loading dish:', error)
+        toast.error('Error al cargar plato')
+        return
+      }
+
+      setDefaultDish(data)
     }
 
-    sales.unshift(newSale)
-    localStorage.setItem('sales', JSON.stringify(sales))
+    loadDefaultDish()
+  }, [])
+
+  const handleAddSale = async () => {
+    if (quantity <= 0) return
+    if (!defaultDish) return
+    if (!customerName.trim()) {
+      toast.error('El nombre del cliente es obligatorio')
+      return
+    }
+
+    const total = quantity * defaultDish.price
+
+    const { error } = await supabase
+      .from('sales')
+      .insert({
+        product: defaultDish.name,
+        quantity,
+        price: defaultDish.price,
+        total,
+        paid: 0,
+        balance: total,
+        customer_name: customerName.trim(),
+        notes: notes || null
+      })
+
+    if (error) {
+      console.error('Error creating sale:', error)
+      toast.error('Error al registrar venta')
+      return
+    }
+
+    toast.success('Venta registrada exitosamente')
 
     // Reset form
     setQuantity(1)
     setCustomerName('')
     setNotes('')
 
-    // Show success and redirect
-    setTimeout(() => navigate('/historial'), 500)
+    setTimeout(() => navigate('/historial'), 1000)
   }
 
-  const total = quantity * DEFAULT_PRODUCT.price
+  const total = defaultDish ? quantity * defaultDish.price : 0
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
@@ -66,22 +96,24 @@ export function Ventas() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="space-y-4 p-4 border rounded-lg bg-primary/5">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-primary/10">
-                    <Package className="h-5 w-5 text-primary" />
+            {defaultDish && (
+              <div className="space-y-4 p-4 border rounded-lg bg-primary/5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-primary/10">
+                      <Package className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-lg">{defaultDish.name}</h3>
+                      <p className="text-sm text-muted-foreground">{defaultDish.description}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-semibold text-lg">{DEFAULT_PRODUCT.name}</h3>
-                    <p className="text-sm text-muted-foreground">{DEFAULT_PRODUCT.description}</p>
-                  </div>
+                  <Badge className="text-lg px-4 py-2">
+                    ${defaultDish.price.toLocaleString('es-CO')}
+                  </Badge>
                 </div>
-                <Badge className="text-lg px-4 py-2">
-                  ${DEFAULT_PRODUCT.price.toLocaleString('es-CO')}
-                </Badge>
               </div>
-            </div>
+            )}
 
             <div className="space-y-4">
               <div className="space-y-2">
@@ -146,11 +178,11 @@ export function Ventas() {
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Producto:</span>
-                  <span className="font-medium">{DEFAULT_PRODUCT.name}</span>
+                  <span className="font-medium">{defaultDish?.name || '-'}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Precio unit.:</span>
-                  <span className="font-medium">${DEFAULT_PRODUCT.price.toLocaleString('es-CO')}</span>
+                  <span className="font-medium">${defaultDish?.price.toLocaleString('es-CO') || 0}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Cantidad:</span>
