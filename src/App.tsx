@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, useNavigate, useParams } from 'react-router-dom'
-import { Home, ShoppingCart, History, Menu, DollarSign, TrendingUp, Plus, Minus, Trash2, User, Eye, Banknote, FileDown, UtensilsCrossed } from 'lucide-react'
+import { Home, ShoppingCart, History, Menu, DollarSign, TrendingUp, Plus, Minus, Trash2, User, Eye, Banknote, FileDown, UtensilsCrossed, Filter } from 'lucide-react'
 import {
   Sidebar,
   SidebarContent,
@@ -939,6 +939,7 @@ function PlatosPage() {
 function HistorialPage() {
   const navigate = useNavigate()
   const [sales, setSales] = useState<any[]>([])
+  const [filterStatus, setFilterStatus] = useState<string>('all')
 
   useEffect(() => {
     loadSales()
@@ -959,7 +960,16 @@ function HistorialPage() {
     setSales(data || [])
   }
 
-  const totalBalance = sales.reduce((sum, sale) => sum + sale.balance, 0)
+  // Filtrar ventas por estado
+  const filteredSales = sales.filter(sale => {
+    if (filterStatus === 'all') return true
+    if (filterStatus === 'paid') return sale.balance === 0
+    if (filterStatus === 'partial') return sale.paid > 0 && sale.balance > 0
+    if (filterStatus === 'pending') return sale.paid === 0
+    return true
+  })
+
+  const totalBalance = filteredSales.reduce((sum, sale) => sum + sale.balance, 0)
 
   return (
     <div className="space-y-6">
@@ -975,15 +985,40 @@ function HistorialPage() {
         </div>
       </div>
 
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+            <div className="flex items-center gap-3">
+              <Filter className="h-5 w-5 text-muted-foreground" />
+              <label className="text-sm font-medium">Filtrar por estado:</label>
+            </div>
+            <Select value={filterStatus} onValueChange={setFilterStatus}>
+              <SelectTrigger className="w-full sm:w-[200px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos</SelectItem>
+                <SelectItem value="paid">Pagado</SelectItem>
+                <SelectItem value="partial">Pago Parcial</SelectItem>
+                <SelectItem value="pending">Pendiente</SelectItem>
+              </SelectContent>
+            </Select>
+            <span className="text-sm text-muted-foreground sm:ml-auto">
+              {filteredSales.length} de {sales.length} ventas
+            </span>
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="grid gap-6 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium">Total Ventas</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{sales.length}</div>
+            <div className="text-3xl font-bold">{filteredSales.length}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Transacciones registradas
+              Transacciones {filterStatus !== 'all' ? 'filtradas' : 'registradas'}
             </p>
           </CardContent>
         </Card>
@@ -997,7 +1032,7 @@ function HistorialPage() {
               ${totalBalance.toLocaleString('es-CO')}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              Saldo pendiente
+              Saldo {filterStatus !== 'all' ? 'filtrado' : 'pendiente'}
             </p>
           </CardContent>
         </Card>
@@ -1008,7 +1043,7 @@ function HistorialPage() {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-green-600">
-              {sales.filter(s => s.balance === 0).length}
+              {filteredSales.filter(s => s.balance === 0).length}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
               Sin saldo pendiente
@@ -1051,7 +1086,7 @@ function HistorialPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {sales.map((sale) => (
+                  {filteredSales.map((sale) => (
                     <TableRow key={sale.id}>
                       <TableCell>
                         <div className="flex items-center gap-2">
