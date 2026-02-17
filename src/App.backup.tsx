@@ -1,36 +1,22 @@
 import { useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, useNavigate, useParams } from 'react-router-dom'
-import { Home, ShoppingCart, History, Menu, DollarSign, TrendingUp, Plus, Minus, Trash2, User, Eye, Banknote, FileDown, UtensilsCrossed, Filter, MoreVertical, Edit, Power, FileText, Users as UsersIcon, LogOut, CalendarIcon } from 'lucide-react'
-import { format } from 'date-fns'
-import { es } from 'date-fns/locale'
+import { Home, ShoppingCart, History, Menu, DollarSign, TrendingUp, Plus, Minus, Trash2, User, Eye, Banknote, FileDown, UtensilsCrossed, Filter, MoreVertical, Edit, Power, FileText } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Calendar } from '@/components/ui/calendar'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { cn } from '@/lib/utils'
 import { Separator } from '@/components/ui/separator'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Toaster, toast } from 'sonner'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { supabase } from '@/lib/supabase'
 import { FishLoader } from '@/components/FishLoader'
 import { BarChart, Bar, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
-
-// Auth imports
-import { AuthProvider, useAuth } from '@/contexts/AuthContext'
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
-import { AdminRoute } from '@/components/auth/AdminRoute'
-import { PublicRoute } from '@/components/auth/PublicRoute'
-import { LoginPage } from '@/pages/auth/LoginPage'
-import { RegisterPage } from '@/pages/auth/RegisterPage'
-import { UserManagementPage } from '@/pages/admin/UserManagementPage'
 
 type Dish = {
   id: number
@@ -40,24 +26,8 @@ type Dish = {
   active: boolean
 }
 
-// Funciones para formatear dinero en formato colombiano
-const formatCurrency = (value: string): string => {
-  // Eliminar todo excepto números
-  const numbers = value.replace(/\D/g, '')
-  if (!numbers) return ''
-
-  // Formatear con separador de miles
-  return parseInt(numbers).toLocaleString('es-CO')
-}
-
-const parseCurrency = (value: string): number => {
-  // Eliminar puntos y convertir a número
-  return parseInt(value.replace(/\./g, '') || '0')
-}
-
 function AppSidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const currentPath = window.location.pathname
-  const { isAdmin } = useAuth()
 
   const menuItems = [
     { href: '/', icon: Home, label: 'Dashboard' },
@@ -65,11 +35,7 @@ function AppSidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
     { href: '/historial', icon: History, label: 'Historial' },
     { href: '/reportes', icon: FileText, label: 'Reportes' },
     { href: '/platos', icon: UtensilsCrossed, label: 'Platos' },
-    { href: '/admin/usuarios', icon: UsersIcon, label: 'Usuarios', adminOnly: true },
   ]
-
-  // Filtrar items según permisos
-  const visibleItems = menuItems.filter(item => !item.adminOnly || isAdmin)
 
   return (
     <>
@@ -103,7 +69,7 @@ function AppSidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
           <p className="mb-3 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Menú Principal
           </p>
-          {visibleItems.map((item) => {
+          {menuItems.map((item) => {
             const Icon = item.icon
             const isActive = currentPath === item.href
             return (
@@ -304,7 +270,7 @@ function HomePage() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">Dashboard</h1>
         <p className="mt-1 text-sm text-muted-foreground sm:mt-2 sm:text-base">
-          Bienvenido al software de gestión de ventas
+          Bienvenido a <span className="brand-name">Deisy&Brian</span>
         </p>
       </div>
 
@@ -542,12 +508,9 @@ function VentasPage() {
   const [customerName, setCustomerName] = useState('')
   const [notes, setNotes] = useState('')
   const [initialPayment, setInitialPayment] = useState('')
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     const loadDishes = async () => {
-      setIsLoading(true)
       const { data, error } = await supabase
         .from('dishes')
         .select('*')
@@ -557,7 +520,6 @@ function VentasPage() {
       if (error) {
         console.error('Error loading dishes:', error)
         toast.error('Error al cargar platos')
-        setIsLoading(false)
         return
       }
 
@@ -567,13 +529,12 @@ function VentasPage() {
       // Seleccionar "Pescado con arroz" por defecto
       const defaultDish = activeDishes.find((d: Dish) => d.name === 'Pescado con arroz') || activeDishes[0]
       setSelectedDish(defaultDish)
-      setIsLoading(false)
     }
 
     loadDishes()
   }, [])
 
-  const handleContinue = () => {
+  const handleAddSale = async () => {
     if (!customerName.trim()) {
       toast.error('El nombre del cliente es obligatorio')
       return
@@ -589,7 +550,7 @@ function VentasPage() {
       return
     }
 
-    const payment = parseCurrency(initialPayment) || 0
+    const payment = parseFloat(initialPayment) || 0
     const total = quantity * selectedDish.price
 
     if (payment < 0) {
@@ -601,19 +562,6 @@ function VentasPage() {
       toast.error('El abono no puede ser mayor al total')
       return
     }
-
-    // Si todas las validaciones pasan, abrir modal de confirmación
-    setShowConfirmDialog(true)
-  }
-
-  const handleAddSale = async () => {
-    if (!selectedDish) {
-      toast.error('Error: No hay plato seleccionado')
-      return
-    }
-
-    const payment = parseCurrency(initialPayment) || 0
-    const total = quantity * selectedDish.price
 
     // Insert sale
     const { data: newSale, error: saleError } = await supabase
@@ -655,8 +603,6 @@ function VentasPage() {
 
     toast.success('Venta registrada exitosamente')
 
-    // Cerrar modal y limpiar formulario
-    setShowConfirmDialog(false)
     setQuantity(1)
     setCustomerName('')
     setNotes('')
@@ -665,32 +611,8 @@ function VentasPage() {
     setTimeout(() => navigate('/historial'), 1000)
   }
 
-  if (isLoading) {
-    return <FishLoader text="Cargando platos..." />
-  }
-
-  if (!selectedDish || dishes.length === 0) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Card className="w-full max-w-md">
-          <CardContent className="pt-6 text-center">
-            <UtensilsCrossed className="mx-auto h-16 w-16 text-muted-foreground/50 mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No hay platos disponibles</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Primero debes activar al menos un plato en la sección de Platos
-            </p>
-            <Button onClick={() => navigate('/platos')}>
-              Ir a Platos
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-
-  // Calcular totales solo cuando selectedDish existe
-  const total = quantity * selectedDish.price
-  const payment = parseCurrency(initialPayment) || 0
+  const total = selectedDish ? quantity * selectedDish.price : 0
+  const payment = parseFloat(initialPayment) || 0
   const balance = total - payment
 
   return (
@@ -781,17 +703,13 @@ function VentasPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="initial-payment">Abono Inicial (opcional)</Label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
-                  <Input
-                    id="initial-payment"
-                    type="text"
-                    placeholder="0"
-                    value={initialPayment}
-                    onChange={(e) => setInitialPayment(formatCurrency(e.target.value))}
-                    className="pl-7"
-                  />
-                </div>
+                <Input
+                  id="initial-payment"
+                  type="number"
+                  placeholder="0"
+                  value={initialPayment}
+                  onChange={(e) => setInitialPayment(e.target.value)}
+                />
               </div>
 
               <div className="space-y-2">
@@ -856,11 +774,12 @@ function VentasPage() {
               </div>
 
               <Button
-                onClick={handleContinue}
+                onClick={handleAddSale}
                 className="w-full"
                 size="lg"
               >
-                Continuar
+                <ShoppingCart className="mr-2 h-5 w-5" />
+                Registrar Venta
               </Button>
 
               <Button
@@ -874,84 +793,6 @@ function VentasPage() {
           </Card>
         </div>
       </div>
-
-      {/* Modal de confirmación */}
-      <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Confirmar Venta</DialogTitle>
-            <DialogDescription>
-              Revisa los detalles antes de registrar la venta
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4 py-4">
-            {/* Cliente */}
-            <div className="flex justify-between items-center pb-2 border-b">
-              <span className="text-sm font-medium text-muted-foreground">Cliente</span>
-              <span className="font-semibold">{customerName}</span>
-            </div>
-
-            {/* Producto */}
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-muted-foreground">Producto</span>
-                <span className="font-medium">{selectedDish?.name}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Precio unitario</span>
-                <span className="text-sm">${selectedDish?.price.toLocaleString('es-CO')}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Cantidad</span>
-                <span className="text-sm">{quantity}</span>
-              </div>
-            </div>
-
-            {/* Totales */}
-            <div className="space-y-2 pt-2 border-t">
-              <div className="flex justify-between items-center">
-                <span className="font-semibold">Total</span>
-                <span className="text-lg font-bold">${total.toLocaleString('es-CO')}</span>
-              </div>
-
-              {payment > 0 && (
-                <>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Abono inicial</span>
-                    <span className="text-sm text-green-600 font-medium">-${payment.toLocaleString('es-CO')}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="font-semibold">Saldo pendiente</span>
-                    <span className="text-lg font-bold text-orange-500">${balance.toLocaleString('es-CO')}</span>
-                  </div>
-                </>
-              )}
-            </div>
-
-            {/* Notas */}
-            {notes && (
-              <div className="pt-2 border-t">
-                <span className="text-sm font-medium text-muted-foreground">Notas</span>
-                <p className="text-sm mt-1">{notes}</p>
-              </div>
-            )}
-          </div>
-
-          <DialogFooter className="gap-2 sm:gap-0">
-            <Button
-              variant="outline"
-              onClick={() => setShowConfirmDialog(false)}
-            >
-              Cancelar
-            </Button>
-            <Button onClick={handleAddSale}>
-              <ShoppingCart className="mr-2 h-4 w-4" />
-              Registrar Venta
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }
@@ -995,7 +836,7 @@ function PlatosPage() {
       return
     }
 
-    const price = parseCurrency(formData.price)
+    const price = parseFloat(formData.price)
     if (isNaN(price) || price <= 0) {
       toast.error('Ingresa un precio válido')
       return
@@ -1048,7 +889,7 @@ function PlatosPage() {
     setEditingDish(dish)
     setFormData({
       name: dish.name,
-      price: dish.price.toLocaleString('es-CO'),
+      price: dish.price.toString(),
       description: dish.description
     })
     setIsDialogOpen(true)
@@ -1139,17 +980,13 @@ function PlatosPage() {
                 <Label htmlFor="dish-price">
                   Precio <span className="text-destructive">*</span>
                 </Label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
-                  <Input
-                    id="dish-price"
-                    type="text"
-                    placeholder="15.000"
-                    value={formData.price}
-                    onChange={(e) => setFormData({ ...formData, price: formatCurrency(e.target.value) })}
-                    className="pl-7"
-                  />
-                </div>
+                <Input
+                  id="dish-price"
+                  type="number"
+                  placeholder="15000"
+                  value={formData.price}
+                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                />
               </div>
 
               <div className="space-y-2">
@@ -1205,26 +1042,42 @@ function PlatosPage() {
       ) : (
         <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
           {dishes.map((dish) => (
-            <Card key={dish.id} className="overflow-hidden">
-              {/* Imagen del producto */}
-              <div className="relative aspect-video bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
-                <UtensilsCrossed className="h-20 w-20 text-primary/40" />
-
-                {/* Badge de estado - esquina superior izquierda */}
-                <div className="absolute top-3 left-3">
-                  <Badge
-                    variant={dish.active ? 'default' : 'secondary'}
-                    className={dish.active ? 'bg-green-600 hover:bg-green-700' : ''}
-                  >
-                    {dish.active ? 'ACTIVO' : 'INACTIVO'}
+            <Card key={dish.id} className={`relative flex flex-col ${!dish.active ? 'opacity-60' : ''}`}>
+              <CardHeader className="pb-3">
+                {/* Badge de estado arriba */}
+                <div className="flex items-start justify-between">
+                  <Badge variant={dish.active ? 'default' : 'secondary'} className="text-xs">
+                    {dish.active ? 'Activo' : 'Inactivo'}
                   </Badge>
+                  <span className="text-2xl">🐟</span>
+                </div>
+              </CardHeader>
+
+              <CardContent className="flex-1 space-y-3">
+                {/* Nombre del plato */}
+                <div>
+                  <h3 className="text-lg font-bold leading-tight line-clamp-2">
+                    {dish.name}
+                  </h3>
                 </div>
 
-                {/* Menú de acciones - esquina superior derecha */}
-                <div className="absolute top-3 right-3">
+                {/* Descripción */}
+                <p className="text-sm text-muted-foreground line-clamp-2 min-h-[40px]">
+                  {dish.description || 'Sin descripción'}
+                </p>
+
+                {/* Precio */}
+                <div className="pt-2">
+                  <p className="text-2xl font-bold text-primary">
+                    ${dish.price.toLocaleString('es-CO')}
+                  </p>
+                </div>
+
+                {/* Botón de acciones - esquina inferior derecha */}
+                <div className="flex justify-end pt-2">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 bg-background/80 hover:bg-background">
+                      <Button variant="ghost" size="icon" className="h-8 w-8">
                         <MoreVertical className="h-4 w-4" />
                         <span className="sr-only">Abrir menú</span>
                       </Button>
@@ -1247,27 +1100,6 @@ function PlatosPage() {
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
-                </div>
-              </div>
-
-              {/* Contenido de la card */}
-              <CardContent className="p-4 space-y-3">
-                {/* Título del plato */}
-                <h3 className="text-lg font-semibold leading-tight line-clamp-2 min-h-[3.5rem]">
-                  {dish.name}
-                </h3>
-
-                {/* Descripción */}
-                <p className="text-sm text-muted-foreground line-clamp-2 min-h-[2.5rem]">
-                  {dish.description || 'Sin descripción'}
-                </p>
-
-                {/* Precio */}
-                <div className="pt-1 pb-2">
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Precio</p>
-                  <p className="text-2xl font-bold text-blue-600">
-                    ${dish.price.toLocaleString('es-CO')}
-                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -1478,7 +1310,6 @@ function ReportesPage() {
   const [filterStatus, setFilterStatus] = useState<string>('all')
   const [filterClient, setFilterClient] = useState<string>('all')
   const [filterProduct, setFilterProduct] = useState<string>('all')
-  const [filterDate, setFilterDate] = useState<Date | undefined>()
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -1520,19 +1351,7 @@ function ReportesPage() {
     // Filtro por producto
     const productMatch = filterProduct === 'all' || sale.product === filterProduct
 
-    // Filtro por fecha (solo día, sin hora)
-    let dateMatch = true
-    if (filterDate) {
-      const saleDate = new Date(sale.created_at)
-      const filterDateCopy = new Date(filterDate)
-
-      // Comparar solo año, mes y día
-      dateMatch = saleDate.getFullYear() === filterDateCopy.getFullYear() &&
-                  saleDate.getMonth() === filterDateCopy.getMonth() &&
-                  saleDate.getDate() === filterDateCopy.getDate()
-    }
-
-    return statusMatch && clientMatch && productMatch && dateMatch
+    return statusMatch && clientMatch && productMatch
   })
 
   const generateFilteredPDF = async () => {
@@ -1690,36 +1509,6 @@ function ReportesPage() {
                 </SelectContent>
               </Select>
             </div>
-
-            {/* Filtro por Fecha */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-muted-foreground">Fecha</label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal px-3 py-2 h-auto",
-                      !filterDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4 flex-shrink-0" />
-                    <span className="flex-1">
-                      {filterDate ? format(filterDate, "PPP", { locale: es }) : "Seleccionar fecha"}
-                    </span>
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={filterDate}
-                    onSelect={setFilterDate}
-                    initialFocus
-                    locale={es}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
           </div>
 
           {/* Contador de resultados */}
@@ -1727,7 +1516,7 @@ function ReportesPage() {
             <span className="text-sm text-muted-foreground">
               Mostrando <span className="font-semibold text-foreground">{filteredSales.length}</span> de <span className="font-semibold text-foreground">{sales.length}</span> ventas
             </span>
-            {(filterStatus !== 'all' || filterClient !== 'all' || filterProduct !== 'all' || filterDate) && (
+            {(filterStatus !== 'all' || filterClient !== 'all' || filterProduct !== 'all') && (
               <Button
                 variant="ghost"
                 size="sm"
@@ -1735,7 +1524,6 @@ function ReportesPage() {
                   setFilterStatus('all')
                   setFilterClient('all')
                   setFilterProduct('all')
-                  setFilterDate(undefined)
                 }}
                 className="text-xs"
               >
@@ -1755,7 +1543,7 @@ function ReportesPage() {
           <CardContent>
             <div className="text-2xl font-bold sm:text-3xl">{filteredSales.length}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              {(filterStatus !== 'all' || filterClient !== 'all' || filterProduct !== 'all' || filterDate) ? 'Con filtros aplicados' : 'Todas las ventas'}
+              {(filterStatus !== 'all' || filterClient !== 'all' || filterProduct !== 'all') ? 'Con filtros aplicados' : 'Todas las ventas'}
             </p>
           </CardContent>
         </Card>
@@ -1769,7 +1557,7 @@ function ReportesPage() {
               ${totalIngresos.toLocaleString('es-CO')}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              Monto {(filterStatus !== 'all' || filterClient !== 'all' || filterProduct !== 'all' || filterDate) ? 'filtrado' : 'total'}
+              Monto {(filterStatus !== 'all' || filterClient !== 'all' || filterProduct !== 'all') ? 'filtrado' : 'total'}
             </p>
           </CardContent>
         </Card>
@@ -1783,7 +1571,7 @@ function ReportesPage() {
               ${totalPendiente.toLocaleString('es-CO')}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              Por cobrar {(filterStatus !== 'all' || filterClient !== 'all' || filterProduct !== 'all' || filterDate) ? '(filtrado)' : '(total)'}
+              Por cobrar {(filterStatus !== 'all' || filterClient !== 'all' || filterProduct !== 'all') ? '(filtrado)' : '(total)'}
             </p>
           </CardContent>
         </Card>
@@ -1925,7 +1713,7 @@ function DetalleVentaPage() {
   const handleAddPayment = async () => {
     if (!sale) return
 
-    const amount = parseCurrency(paymentAmount)
+    const amount = parseFloat(paymentAmount)
     if (isNaN(amount) || amount <= 0) {
       toast.error('Ingresa un monto válido')
       return
@@ -2141,17 +1929,13 @@ function DetalleVentaPage() {
                     <h4 className="font-semibold text-sm">Registrar Abono</h4>
                     <div className="space-y-2">
                       <Label htmlFor="payment-amount">Monto</Label>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
-                        <Input
-                          id="payment-amount"
-                          type="text"
-                          placeholder="0"
-                          value={paymentAmount}
-                          onChange={(e) => setPaymentAmount(formatCurrency(e.target.value))}
-                          className="pl-7"
-                        />
-                      </div>
+                      <Input
+                        id="payment-amount"
+                        type="number"
+                        placeholder="0"
+                        value={paymentAmount}
+                        onChange={(e) => setPaymentAmount(e.target.value)}
+                      />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="payment-note">Nota (opcional)</Label>
@@ -2188,124 +1972,66 @@ function DetalleVentaPage() {
   )
 }
 
-function AppHeader() {
-  const { profile, signOut } = useAuth()
-
-  const handleLogout = async () => {
-    try {
-      await signOut()
-      toast.success('Sesión cerrada')
-    } catch (error) {
-      console.error('Error signing out:', error)
-      toast.error('Error al cerrar sesión')
-    }
-  }
-
-  return (
-    <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 px-4 sm:h-16 sm:px-6">
-      <div className="flex flex-1 items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="lg:hidden"
-            onClick={() => {
-              const sidebar = document.querySelector('aside')
-              sidebar?.classList.toggle('-translate-x-full')
-            }}
-          >
-            <Menu className="h-5 w-5" />
-          </Button>
-          <div className="flex items-center gap-2">
-            <div className="hidden h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/80 text-xl sm:flex lg:hidden">
-              🐟
-            </div>
-            <h1 className="brand-name text-base sm:text-lg">Deisy&Brian</h1>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 sm:gap-3">
-          <Button onClick={generatePDF} variant="outline" size="sm" className="h-8 sm:h-9">
-            <FileDown className="h-4 w-4 sm:mr-2" />
-            <span className="hidden sm:inline">Exportar</span>
-          </Button>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="h-8 sm:h-9 gap-2">
-                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs">
-                  {profile?.email.charAt(0).toUpperCase()}
-                </div>
-                <span className="hidden md:inline text-sm max-w-[150px] truncate">
-                  {profile?.email}
-                </span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>
-                <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">{profile?.email}</p>
-                  <p className="text-xs leading-none text-muted-foreground">
-                    <Badge variant={profile?.role === 'admin' ? 'default' : 'secondary'} className="mt-1">
-                      {profile?.role === 'admin' && '👑 '}
-                      {profile?.role}
-                    </Badge>
-                  </p>
-                </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
-                <LogOut className="mr-2 h-4 w-4" />
-                Cerrar Sesión
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
-    </header>
-  )
-}
-
-function AppLayout() {
+function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
-    <div className="min-h-screen bg-background">
-      <AppSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      <div className="lg:ml-64">
-        <AppHeader />
-        <main className="min-h-[calc(100vh-3.5rem)] bg-muted/30 sm:min-h-[calc(100vh-4rem)]">
-          <div className="container mx-auto p-4 sm:p-6 lg:p-8">
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/ventas" element={<VentasPage />} />
-              <Route path="/historial" element={<HistorialPage />} />
-              <Route path="/reportes" element={<ReportesPage />} />
-              <Route path="/platos" element={<PlatosPage />} />
-              <Route path="/venta/:id" element={<DetalleVentaPage />} />
-              <Route path="/admin/usuarios" element={<AdminRoute><UserManagementPage /></AdminRoute>} />
-            </Routes>
-          </div>
-        </main>
-      </div>
-    </div>
-  )
-}
-
-function App() {
-  return (
     <BrowserRouter>
-      <AuthProvider>
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
-          <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
+      <div className="min-h-screen bg-background">
+        <AppSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-          {/* Protected Routes */}
-          <Route path="/*" element={<ProtectedRoute><AppLayout /></ProtectedRoute>} />
-        </Routes>
-        <Toaster position="top-right" richColors />
-      </AuthProvider>
+        {/* Main Content - responsive margin */}
+        <div className="lg:ml-64">
+          {/* Header Superior */}
+          <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 px-4 sm:h-16 sm:px-6">
+            <div className="flex flex-1 items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                {/* Botón Hamburguesa - Solo en móvil */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="lg:hidden"
+                  onClick={() => setSidebarOpen(true)}
+                >
+                  <Menu className="h-5 w-5" />
+                </Button>
+                <div className="flex items-center gap-2">
+                  <div className="hidden h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/80 text-xl sm:flex lg:hidden">
+                    🐟
+                  </div>
+                  <h1 className="brand-name text-base sm:text-lg">Deisy&Brian</h1>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 sm:gap-3">
+                <Button onClick={generatePDF} variant="outline" size="sm" className="h-8 sm:h-9">
+                  <FileDown className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Exportar</span>
+                </Button>
+                <div className="hidden items-center gap-2 rounded-lg border bg-background px-2.5 py-1 sm:flex sm:px-3 sm:py-1.5">
+                  <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-green-500 sm:h-2 sm:w-2" />
+                  <span className="text-xs font-medium sm:text-sm">En Línea</span>
+                </div>
+              </div>
+            </div>
+          </header>
+
+          {/* Contenido Principal */}
+          <main className="min-h-[calc(100vh-3.5rem)] bg-muted/30 sm:min-h-[calc(100vh-4rem)]">
+            <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/ventas" element={<VentasPage />} />
+                <Route path="/historial" element={<HistorialPage />} />
+                <Route path="/reportes" element={<ReportesPage />} />
+                <Route path="/platos" element={<PlatosPage />} />
+                <Route path="/venta/:id" element={<DetalleVentaPage />} />
+              </Routes>
+            </div>
+          </main>
+        </div>
+      </div>
+      <Toaster position="top-right" richColors />
     </BrowserRouter>
   )
 }

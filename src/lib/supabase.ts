@@ -108,6 +108,43 @@ export type Database = {
           created_at?: string
         }
       }
+      profiles: {
+        Row: {
+          id: string
+          email: string
+          role: 'admin' | 'vendedor' | 'supervisor'
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id: string
+          email: string
+          role?: 'admin' | 'vendedor' | 'supervisor'
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          email?: string
+          role?: 'admin' | 'vendedor' | 'supervisor'
+          is_active?: boolean
+          updated_at?: string
+        }
+      }
+      app_config: {
+        Row: {
+          key: string
+          value: string
+        }
+        Insert: {
+          key: string
+          value: string
+        }
+        Update: {
+          value?: string
+        }
+      }
     }
   }
 }
