@@ -130,11 +130,17 @@ async function generatePDF() {
     return
   }
 
-  const doc = new jsPDF()
+  const doc = new jsPDF({
+    putOnlyUsedFonts: true,
+    compress: true
+  })
+
+  // Configurar codificación UTF-8
+  doc.setLanguage('es')
 
   // Título
   doc.setFontSize(20)
-  doc.text('🐟 Deisy&Brian', 14, 20)
+  doc.text('Deisy&Brian', 14, 20)
   doc.setFontSize(12)
   doc.text('Reporte de Ventas', 14, 28)
   doc.setFontSize(10)
@@ -154,8 +160,8 @@ async function generatePDF() {
 
   // Tabla de ventas
   const tableData = sales.map((sale: any) => [
-    sale.customer_name,
-    sale.product,
+    sale.customer_name || '',
+    sale.product || '',
     sale.quantity.toString(),
     `$${sale.total.toLocaleString('es-CO')}`,
     `$${sale.paid.toLocaleString('es-CO')}`,
@@ -169,10 +175,20 @@ async function generatePDF() {
     body: tableData,
     theme: 'grid',
     headStyles: { fillColor: [59, 130, 246] },
-    styles: { fontSize: 9 }
+    styles: {
+      fontSize: 9,
+      font: 'helvetica',
+      fontStyle: 'normal'
+    },
+    didParseCell: function(data) {
+      // Asegurar que el contenido se renderice correctamente
+      if (data.cell.raw) {
+        data.cell.text = [String(data.cell.raw)]
+      }
+    }
   })
 
-  doc.save(`es-pescado-ventas-${Date.now()}.pdf`)
+  doc.save(`deisy-brian-ventas-${Date.now()}.pdf`)
   toast.success('PDF generado exitosamente')
 }
 
