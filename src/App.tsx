@@ -29,6 +29,7 @@ import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { supabase } from '@/lib/supabase'
 import { FishLoader } from '@/components/FishLoader'
+import { LineChart, Line, BarChart, Bar, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 
 type Dish = {
   id: number
@@ -200,12 +201,15 @@ function HomePage() {
     todaySales: 0,
     pendingBalance: 0
   })
+  const [salesByDay, setSalesByDay] = useState<any[]>([])
+  const [topDishes, setTopDishes] = useState<any[]>([])
 
   useEffect(() => {
     const loadStats = async () => {
       const { data: sales, error } = await supabase
         .from('sales')
         .select('*')
+        .order('created_at', { ascending: true })
 
       if (error) {
         console.error('Error loading stats:', error)
@@ -224,6 +228,47 @@ function HomePage() {
         todaySales: todaySales.length,
         pendingBalance: sales?.reduce((sum: number, sale: any) => sum + sale.balance, 0) || 0
       })
+
+      // Procesar datos para gráfico de ventas por día (últimos 7 días)
+      const last7Days: any[] = []
+      for (let i = 6; i >= 0; i--) {
+        const date = new Date()
+        date.setDate(date.getDate() - i)
+        const dateStr = date.toLocaleDateString('es-CO', { month: 'short', day: 'numeric' })
+        const dayStr = date.toDateString()
+
+        const daySales = sales?.filter((sale: any) =>
+          new Date(sale.created_at).toDateString() === dayStr
+        ) || []
+
+        last7Days.push({
+          fecha: dateStr,
+          ventas: daySales.length,
+          ingresos: daySales.reduce((sum: number, s: any) => sum + s.total, 0)
+        })
+      }
+      setSalesByDay(last7Days)
+
+      // Procesar datos para platos más vendidos
+      const dishesMap = new Map<string, { cantidad: number, ingresos: number }>()
+      sales?.forEach((sale: any) => {
+        const existing = dishesMap.get(sale.product) || { cantidad: 0, ingresos: 0 }
+        dishesMap.set(sale.product, {
+          cantidad: existing.cantidad + sale.quantity,
+          ingresos: existing.ingresos + sale.total
+        })
+      })
+
+      const dishesArray = Array.from(dishesMap.entries())
+        .map(([name, data]) => ({
+          plato: name,
+          cantidad: data.cantidad,
+          ingresos: data.ingresos
+        }))
+        .sort((a, b) => b.cantidad - a.cantidad)
+        .slice(0, 5)
+
+      setTopDishes(dishesArray)
     }
 
     loadStats()
@@ -298,6 +343,106 @@ function HomePage() {
             <p className="text-xs text-muted-foreground">
               Por venta
             </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Gráficos */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Ventas Últimos 7 Días</CardTitle>
+            <CardDescription>Tendencia de ventas e ingresos diarios</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <AreaChart data={salesByDay}>
+                <defs>
+                  <linearGradient id="colorVentas" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                  </linearGradient>
+                  <linearGradient id="colorIngresos" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                <XAxis
+                  dataKey="fecha"
+                  className="text-xs"
+                  tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                />
+                <YAxis
+                  className="text-xs"
+                  tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'hsl(var(--background))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px'
+                  }}
+                />
+                <Legend />
+                <Area
+                  type="monotone"
+                  dataKey="ventas"
+                  stroke="#3b82f6"
+                  fillOpacity={1}
+                  fill="url(#colorVentas)"
+                  name="Ventas"
+                />
+                <Area
+                  type="monotone"
+                  dataKey="ingresos"
+                  stroke="#10b981"
+                  fillOpacity={1}
+                  fill="url(#colorIngresos)"
+                  name="Ingresos ($)"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Platos Más Vendidos</CardTitle>
+            <CardDescription>Top 5 platos por cantidad vendida</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={topDishes}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                <XAxis
+                  dataKey="plato"
+                  className="text-xs"
+                  tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                  angle={-45}
+                  textAnchor="end"
+                  height={80}
+                />
+                <YAxis
+                  className="text-xs"
+                  tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'hsl(var(--background))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px'
+                  }}
+                />
+                <Legend />
+                <Bar
+                  dataKey="cantidad"
+                  fill="#3b82f6"
+                  name="Cantidad"
+                  radius={[8, 8, 0, 0]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
           </CardContent>
         </Card>
       </div>
