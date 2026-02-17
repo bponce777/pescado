@@ -215,14 +215,14 @@ function HomePage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
           <p className="text-muted-foreground">
             Bienvenido a Deisy&Brian
           </p>
         </div>
-        <Button onClick={generatePDF} size="lg" className="w-full md:w-auto">
+        <Button onClick={generatePDF} size="lg">
           <FileDown className="mr-2 h-5 w-5" />
           Descargar PDF
         </Button>
@@ -471,7 +471,7 @@ function VentasPage() {
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto px-4 md:px-6">
-      <div className="text-center md:text-left">
+      <div>
         <h2 className="text-3xl font-bold tracking-tight">Nueva Venta</h2>
         <p className="text-muted-foreground">
           Registra una nueva venta en el sistema
@@ -999,9 +999,7 @@ function HistorialPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">
-            Historial de Ventas
-          </h2>
+          <h2 className="text-3xl font-bold tracking-tight">Historial de Ventas</h2>
           <p className="text-muted-foreground">
             Registro de todas las ventas
           </p>
