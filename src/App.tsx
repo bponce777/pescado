@@ -809,8 +809,8 @@ function PlatosPage() {
         </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
-        <Card className="md:col-span-1">
+      <div className="grid gap-6 lg:grid-cols-[400px_1fr]">
+        <Card>
           <CardHeader>
             <CardTitle>{editingDish ? 'Editar Plato' : 'Nuevo Plato'}</CardTitle>
           </CardHeader>
@@ -863,7 +863,7 @@ function PlatosPage() {
           </CardContent>
         </Card>
 
-        <Card className="md:col-span-2">
+        <Card>
           <CardHeader>
             <CardTitle>Platos Registrados</CardTitle>
             <CardDescription>
@@ -880,40 +880,45 @@ function PlatosPage() {
                 {dishes.map((dish) => (
                   <div
                     key={dish.id}
-                    className={`flex items-center justify-between p-4 border rounded-lg ${
+                    className={`flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-4 border rounded-lg ${
                       !dish.active ? 'opacity-50' : ''
                     }`}
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="text-2xl">🐟</div>
-                      <div>
-                        <h3 className="font-semibold">{dish.name}</h3>
-                        <p className="text-sm text-muted-foreground">{dish.description}</p>
-                        <p className="text-sm font-medium text-primary">
-                          ${dish.price.toLocaleString('es-CO')}
-                        </p>
+                    <div className="flex items-start gap-3 flex-1 min-w-0">
+                      <div className="text-3xl flex-shrink-0">🐟</div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-lg truncate">{dish.name}</h3>
+                        <p className="text-sm text-muted-foreground line-clamp-2">{dish.description}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <p className="text-lg font-bold text-primary">
+                            ${dish.price.toLocaleString('es-CO')}
+                          </p>
+                          <Badge variant={dish.active ? 'default' : 'secondary'} className="ml-auto md:hidden">
+                            {dish.active ? 'Activo' : 'Inactivo'}
+                          </Badge>
+                        </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant={dish.active ? 'default' : 'secondary'}>
+                    <div className="flex items-center gap-2 flex-wrap md:flex-nowrap">
+                      <Badge variant={dish.active ? 'default' : 'secondary'} className="hidden md:inline-flex">
                         {dish.active ? 'Activo' : 'Inactivo'}
                       </Badge>
                       <Button
-                        variant="ghost"
+                        variant="outline"
                         size="sm"
                         onClick={() => handleEdit(dish)}
                       >
                         Editar
                       </Button>
                       <Button
-                        variant="ghost"
+                        variant="outline"
                         size="sm"
                         onClick={() => handleToggleActive(dish)}
                       >
                         {dish.active ? 'Desactivar' : 'Activar'}
                       </Button>
                       <Button
-                        variant="ghost"
+                        variant="outline"
                         size="sm"
                         onClick={() => handleDelete(dish)}
                       >
