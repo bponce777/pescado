@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, useNavigate, useParams } from 'react-router-dom'
-import { Home, ShoppingCart, History, DollarSign, TrendingUp, Plus, Minus, Trash2, User, Eye, Banknote, FileDown, UtensilsCrossed, Filter } from 'lucide-react'
+import { Home, ShoppingCart, History, Menu, DollarSign, TrendingUp, Plus, Minus, Trash2, User, Eye, Banknote, FileDown, UtensilsCrossed, Filter } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -25,7 +25,7 @@ type Dish = {
   active: boolean
 }
 
-function AppSidebar() {
+function AppSidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const currentPath = window.location.pathname
 
   const menuItems = [
@@ -36,54 +36,70 @@ function AppSidebar() {
   ]
 
   return (
-    <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r bg-card">
-      {/* Header del Sidebar */}
-      <div className="flex h-16 items-center gap-3 border-b px-6">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/80 text-2xl shadow-sm">
-          🐟
-        </div>
-        <div className="flex flex-col">
-          <span className="font-bold text-lg leading-none">Deisy&Brian</span>
-          <span className="text-xs text-muted-foreground">CRM Ventas</span>
-        </div>
-      </div>
+    <>
+      {/* Overlay para móvil */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
+          onClick={onClose}
+        />
+      )}
 
-      {/* Navegación */}
-      <nav className="flex-1 space-y-1 p-4">
-        <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          Menú Principal
-        </p>
-        {menuItems.map((item) => {
-          const Icon = item.icon
-          const isActive = currentPath === item.href
-          return (
-            <a
-              key={item.href}
-              href={item.href}
-              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                isActive
-                  ? 'bg-primary text-primary-foreground shadow-sm'
-                  : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-              }`}
-            >
-              <Icon className="h-5 w-5" />
-              <span>{item.label}</span>
-            </a>
-          )
-        })}
-      </nav>
-
-      {/* Footer */}
-      <div className="absolute bottom-0 left-0 right-0 border-t bg-card p-4">
-        <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-          <div className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
-          <span>Sistema Activo</span>
+      {/* Sidebar */}
+      <aside
+        className={`fixed left-0 top-0 z-50 h-screen w-64 border-r bg-card shadow-xl transition-transform duration-300 lg:translate-x-0 lg:shadow-none ${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        {/* Header del Sidebar */}
+        <div className="flex h-16 items-center gap-3 border-b px-6">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/80 text-2xl shadow-sm">
+            🐟
+          </div>
+          <div className="flex flex-col min-w-0">
+            <span className="font-bold text-lg leading-tight truncate">Deisy&Brian</span>
+            <span className="text-xs text-muted-foreground font-medium">CRM Ventas</span>
+          </div>
         </div>
-        <p className="mt-2 text-center text-xs text-muted-foreground">
-          © 2026 Deisy&Brian
-        </p>
-      </div>
-    </aside>
+
+        {/* Navegación */}
+        <nav className="flex-1 space-y-1 p-4">
+          <p className="mb-3 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Menú Principal
+          </p>
+          {menuItems.map((item) => {
+            const Icon = item.icon
+            const isActive = currentPath === item.href
+            return (
+              <a
+                key={item.href}
+                href={item.href}
+                onClick={() => onClose()}
+                className={`flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-all ${
+                  isActive
+                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    : 'text-foreground/70 hover:bg-accent hover:text-accent-foreground'
+                }`}
+              >
+                <Icon className="h-5 w-5 shrink-0" />
+                <span>{item.label}</span>
+              </a>
+            )
+          })}
+        </nav>
+
+        {/* Footer */}
+        <div className="absolute bottom-0 left-0 right-0 border-t bg-card p-4">
+          <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+            <div className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
+            <span className="font-medium">Sistema Activo</span>
+          </div>
+          <p className="mt-2 text-center text-xs text-muted-foreground font-medium">
+            © 2026 Deisy&Brian
+          </p>
+        </div>
+      </aside>
+    </>
   )
 }
 
@@ -248,14 +264,14 @@ function HomePage() {
   }, [])
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 sm:space-y-8">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-        <p className="text-muted-foreground">
+        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">Dashboard</h1>
+        <p className="mt-1 text-sm text-muted-foreground sm:mt-2 sm:text-base">
           Bienvenido a Deisy&Brian
         </p>
-        <Button onClick={generatePDF} size="lg" className="mt-4">
-          <FileDown className="mr-2 h-5 w-5" />
+        <Button onClick={generatePDF} size="lg" className="mt-4 w-full sm:w-auto">
+          <FileDown className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
           Descargar PDF
         </Button>
       </div>
@@ -602,10 +618,10 @@ function VentasPage() {
   const balance = total - payment
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto px-4 md:px-6">
+    <div className="space-y-6 max-w-5xl mx-auto">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">Nueva Venta</h2>
-        <p className="text-muted-foreground">
+        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">Nueva Venta</h1>
+        <p className="mt-1 text-sm text-muted-foreground sm:mt-2 sm:text-base">
           Registra una nueva venta en el sistema
         </p>
       </div>
@@ -927,10 +943,10 @@ function PlatosPage() {
 
   return (
     <div className="space-y-6 px-4 md:px-0">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Gestión de Platos</h2>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">Gestión de Platos</h1>
+          <p className="mt-1 text-sm text-muted-foreground sm:mt-2 sm:text-base">
             Administra los platos disponibles
           </p>
         </div>
@@ -1129,13 +1145,11 @@ function HistorialPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Historial de Ventas</h2>
-          <p className="text-muted-foreground">
-            Registro de todas las ventas
-          </p>
-        </div>
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">Historial de Ventas</h1>
+        <p className="mt-1 text-sm text-muted-foreground sm:mt-2 sm:text-base">
+          Registro de todas las ventas
+        </p>
       </div>
 
       <Card>
@@ -1419,15 +1433,15 @@ function DetalleVentaPage() {
   }
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto px-4 md:px-0">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 max-w-5xl mx-auto">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Detalle de Venta</h2>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">Detalle de Venta</h1>
+          <p className="mt-1 text-sm text-muted-foreground sm:mt-2 sm:text-base">
             Información completa y pagos
           </p>
         </div>
-        <Button variant="outline" onClick={() => navigate('/historial')}>
+        <Button variant="outline" onClick={() => navigate('/historial')} className="w-full sm:w-auto">
           Volver
         </Button>
       </div>
@@ -1596,35 +1610,52 @@ function DetalleVentaPage() {
 }
 
 function App() {
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+
   return (
     <BrowserRouter>
       <div className="min-h-screen bg-background">
-        <AppSidebar />
+        <AppSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-        {/* Main Content - con margin-left para el sidebar */}
-        <div className="ml-64">
+        {/* Main Content - responsive margin */}
+        <div className="lg:ml-64">
           {/* Header Superior */}
-          <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 px-6">
-            <div className="flex flex-1 items-center justify-between">
-              <div className="flex items-center gap-4">
-                <h1 className="text-lg font-semibold">Sistema de Gestión</h1>
-              </div>
+          <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 px-4 sm:h-16 sm:px-6">
+            <div className="flex flex-1 items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <Button onClick={generatePDF} variant="outline" size="sm">
-                  <FileDown className="mr-2 h-4 w-4" />
-                  Exportar
+                {/* Botón Hamburguesa - Solo en móvil */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="lg:hidden"
+                  onClick={() => setSidebarOpen(true)}
+                >
+                  <Menu className="h-5 w-5" />
                 </Button>
-                <div className="flex items-center gap-2 rounded-lg border bg-background px-3 py-1.5">
-                  <div className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
-                  <span className="text-sm font-medium">En Línea</span>
+                <div className="flex items-center gap-2">
+                  <div className="hidden h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/80 text-xl sm:flex lg:hidden">
+                    🐟
+                  </div>
+                  <h1 className="text-base font-semibold sm:text-lg">Deisy&Brian</h1>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 sm:gap-3">
+                <Button onClick={generatePDF} variant="outline" size="sm" className="h-8 sm:h-9">
+                  <FileDown className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Exportar</span>
+                </Button>
+                <div className="hidden items-center gap-2 rounded-lg border bg-background px-2.5 py-1 sm:flex sm:px-3 sm:py-1.5">
+                  <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-green-500 sm:h-2 sm:w-2" />
+                  <span className="text-xs font-medium sm:text-sm">En Línea</span>
                 </div>
               </div>
             </div>
           </header>
 
           {/* Contenido Principal */}
-          <main className="min-h-[calc(100vh-4rem)] bg-muted/30">
-            <div className="container mx-auto p-6 md:p-8">
+          <main className="min-h-[calc(100vh-3.5rem)] bg-muted/30 sm:min-h-[calc(100vh-4rem)]">
+            <div className="container mx-auto p-4 sm:p-6 lg:p-8">
               <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/ventas" element={<VentasPage />} />
