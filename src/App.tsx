@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, useNavigate, useParams } from 'react-router-dom'
-import { Home, ShoppingCart, History, Menu, DollarSign, TrendingUp, Plus, Minus, Trash2, User, Eye, Banknote, FileDown, UtensilsCrossed, Filter } from 'lucide-react'
+import { Home, ShoppingCart, History, Menu, DollarSign, TrendingUp, Plus, Minus, Trash2, User, Eye, Banknote, FileDown, UtensilsCrossed, Filter, MoreVertical, Edit, Power } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Toaster, toast } from 'sonner'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
@@ -1014,19 +1015,24 @@ function PlatosPage() {
         </Dialog>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Platos Registrados</CardTitle>
-          <CardDescription>
-            {dishes.filter(d => d.active).length} platos activos de {dishes.length} totales
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {dishes.length === 0 ? (
-            <div className="text-center py-16">
+      {/* Header con contador */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-semibold sm:text-xl">Platos Registrados</h2>
+          <p className="text-sm text-muted-foreground">
+            {dishes.filter(d => d.active).length} activos de {dishes.length} totales
+          </p>
+        </div>
+      </div>
+
+      {/* Grid de Cards */}
+      {dishes.length === 0 ? (
+        <Card>
+          <CardContent className="py-16">
+            <div className="text-center">
               <UtensilsCrossed className="mx-auto h-16 w-16 text-muted-foreground/50 mb-4" />
               <h3 className="text-lg font-semibold mb-2">No hay platos registrados</h3>
-              <p className="text-muted-foreground mb-4">
+              <p className="text-sm text-muted-foreground mb-4">
                 Comienza agregando tu primer plato
               </p>
               <Button onClick={() => setIsDialogOpen(true)}>
@@ -1034,76 +1040,75 @@ function PlatosPage() {
                 Agregar Plato
               </Button>
             </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nombre</TableHead>
-                    <TableHead>Descripción</TableHead>
-                    <TableHead className="text-right">Precio</TableHead>
-                    <TableHead className="text-center">Estado</TableHead>
-                    <TableHead className="text-right">Acciones</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {dishes.map((dish) => (
-                    <TableRow key={dish.id} className={!dish.active ? 'opacity-50' : ''}>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xl">🐟</span>
-                          <span className="font-medium">{dish.name}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-sm text-muted-foreground">
-                          {dish.description || '-'}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <span className="font-bold text-primary">
-                          ${dish.price.toLocaleString('es-CO')}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Badge variant={dish.active ? 'default' : 'secondary'}>
-                          {dish.active ? 'Activo' : 'Inactivo'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEdit(dish)}
-                          >
-                            Editar
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleToggleActive(dish)}
-                          >
-                            {dish.active ? 'Desactivar' : 'Activar'}
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleDelete(dish)}
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                            <span className="sr-only">Eliminar</span>
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {dishes.map((dish) => (
+            <Card key={dish.id} className={`relative flex flex-col ${!dish.active ? 'opacity-60' : ''}`}>
+              <CardHeader className="pb-3">
+                {/* Badge de estado arriba */}
+                <div className="flex items-start justify-between">
+                  <Badge variant={dish.active ? 'default' : 'secondary'} className="text-xs">
+                    {dish.active ? 'Activo' : 'Inactivo'}
+                  </Badge>
+                  <span className="text-2xl">🐟</span>
+                </div>
+              </CardHeader>
+
+              <CardContent className="flex-1 space-y-3">
+                {/* Nombre del plato */}
+                <div>
+                  <h3 className="text-lg font-bold leading-tight line-clamp-2">
+                    {dish.name}
+                  </h3>
+                </div>
+
+                {/* Descripción */}
+                <p className="text-sm text-muted-foreground line-clamp-2 min-h-[40px]">
+                  {dish.description || 'Sin descripción'}
+                </p>
+
+                {/* Precio */}
+                <div className="pt-2">
+                  <p className="text-2xl font-bold text-primary">
+                    ${dish.price.toLocaleString('es-CO')}
+                  </p>
+                </div>
+
+                {/* Botón de acciones - esquina inferior derecha */}
+                <div className="flex justify-end pt-2">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <MoreVertical className="h-4 w-4" />
+                        <span className="sr-only">Abrir menú</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48">
+                      <DropdownMenuItem onClick={() => handleEdit(dish)}>
+                        <Edit className="mr-2 h-4 w-4" />
+                        Editar
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleToggleActive(dish)}>
+                        <Power className="mr-2 h-4 w-4" />
+                        {dish.active ? 'Desactivar' : 'Activar'}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleDelete(dish)}
+                        className="text-destructive focus:text-destructive"
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Eliminar
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
