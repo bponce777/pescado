@@ -1,20 +1,6 @@
 import { useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, useNavigate, useParams } from 'react-router-dom'
-import { Home, ShoppingCart, History, Menu, DollarSign, TrendingUp, Plus, Minus, Trash2, User, Eye, Banknote, FileDown, UtensilsCrossed, Filter } from 'lucide-react'
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarProvider,
-  SidebarTrigger,
-  SidebarHeader,
-  SidebarFooter
-} from '@/components/ui/sidebar'
+import { Home, ShoppingCart, History, DollarSign, TrendingUp, Plus, Minus, Trash2, User, Eye, Banknote, FileDown, UtensilsCrossed, Filter } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -43,74 +29,61 @@ function AppSidebar() {
   const currentPath = window.location.pathname
 
   const menuItems = [
-    { href: '/', icon: Home, label: 'Dashboard', tooltip: 'Inicio' },
-    { href: '/ventas', icon: ShoppingCart, label: 'Nueva Venta', tooltip: 'Registrar venta' },
-    { href: '/historial', icon: History, label: 'Historial', tooltip: 'Ver historial' },
-    { href: '/platos', icon: UtensilsCrossed, label: 'Platos', tooltip: 'Gestionar platos' },
+    { href: '/', icon: Home, label: 'Dashboard' },
+    { href: '/ventas', icon: ShoppingCart, label: 'Nueva Venta' },
+    { href: '/historial', icon: History, label: 'Historial' },
+    { href: '/platos', icon: UtensilsCrossed, label: 'Platos' },
   ]
 
   return (
-    <Sidebar collapsible="icon">
-      <SidebarHeader className="border-b">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild className="hover:bg-accent">
-              <a href="/">
-                <div className="flex aspect-square size-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-sm text-2xl">
-                  🐟
-                </div>
-                <div className="flex flex-col gap-0.5 leading-none">
-                  <span className="font-bold text-lg">Deisy&Brian</span>
-                  <span className="text-xs text-muted-foreground font-medium">Sistema de Ventas</span>
-                </div>
-              </a>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarHeader>
-
-      <SidebarContent className="px-2 py-4">
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider px-2 mb-2">
-            Navegación
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu className="space-y-1">
-              {menuItems.map((item) => {
-                const Icon = item.icon
-                const isActive = currentPath === item.href
-                return (
-                  <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton
-                      asChild
-                      tooltip={item.tooltip}
-                      className={isActive ? 'bg-accent text-accent-foreground font-semibold' : 'hover:bg-accent/50'}
-                    >
-                      <a href={item.href} className="gap-3">
-                        <Icon className={isActive ? 'h-5 w-5' : 'h-4 w-4'} />
-                        <span>{item.label}</span>
-                      </a>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                )
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
-
-      <SidebarFooter className="border-t p-4">
-        <div className="flex flex-col gap-2 text-center">
-          <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-            <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
-            <span>Sistema Activo</span>
-          </div>
-          <span className="text-xs text-muted-foreground font-medium">
-            © 2026 Deisy&Brian
-          </span>
+    <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r bg-card">
+      {/* Header del Sidebar */}
+      <div className="flex h-16 items-center gap-3 border-b px-6">
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/80 text-2xl shadow-sm">
+          🐟
         </div>
-      </SidebarFooter>
-    </Sidebar>
+        <div className="flex flex-col">
+          <span className="font-bold text-lg leading-none">Deisy&Brian</span>
+          <span className="text-xs text-muted-foreground">CRM Ventas</span>
+        </div>
+      </div>
+
+      {/* Navegación */}
+      <nav className="flex-1 space-y-1 p-4">
+        <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Menú Principal
+        </p>
+        {menuItems.map((item) => {
+          const Icon = item.icon
+          const isActive = currentPath === item.href
+          return (
+            <a
+              key={item.href}
+              href={item.href}
+              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                isActive
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+              }`}
+            >
+              <Icon className="h-5 w-5" />
+              <span>{item.label}</span>
+            </a>
+          )
+        })}
+      </nav>
+
+      {/* Footer */}
+      <div className="absolute bottom-0 left-0 right-0 border-t bg-card p-4">
+        <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+          <div className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
+          <span>Sistema Activo</span>
+        </div>
+        <p className="mt-2 text-center text-xs text-muted-foreground">
+          © 2026 Deisy&Brian
+        </p>
+      </div>
+    </aside>
   )
 }
 
@@ -1625,33 +1598,44 @@ function DetalleVentaPage() {
 function App() {
   return (
     <BrowserRouter>
-      <SidebarProvider defaultOpen={true}>
-        <div className="flex min-h-screen w-full bg-background">
-          <AppSidebar />
-          <div className="flex-1 flex flex-col min-w-0">
-            <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-4 border-b bg-background px-6">
-              <SidebarTrigger>
-                <Button variant="ghost" size="icon">
-                  <Menu className="h-5 w-5" />
-                </Button>
-              </SidebarTrigger>
-              <Separator orientation="vertical" className="h-6" />
-              <h1 className="text-xl font-semibold">🐟 Deisy&Brian</h1>
-            </header>
-            <main className="flex-1 overflow-auto">
-              <div className="p-4 md:p-6">
-                <Routes>
-                  <Route path="/" element={<HomePage />} />
-                  <Route path="/ventas" element={<VentasPage />} />
-                  <Route path="/historial" element={<HistorialPage />} />
-                  <Route path="/platos" element={<PlatosPage />} />
-                  <Route path="/venta/:id" element={<DetalleVentaPage />} />
-                </Routes>
+      <div className="min-h-screen bg-background">
+        <AppSidebar />
+
+        {/* Main Content - con margin-left para el sidebar */}
+        <div className="ml-64">
+          {/* Header Superior */}
+          <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 px-6">
+            <div className="flex flex-1 items-center justify-between">
+              <div className="flex items-center gap-4">
+                <h1 className="text-lg font-semibold">Sistema de Gestión</h1>
               </div>
-            </main>
-          </div>
+              <div className="flex items-center gap-3">
+                <Button onClick={generatePDF} variant="outline" size="sm">
+                  <FileDown className="mr-2 h-4 w-4" />
+                  Exportar
+                </Button>
+                <div className="flex items-center gap-2 rounded-lg border bg-background px-3 py-1.5">
+                  <div className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
+                  <span className="text-sm font-medium">En Línea</span>
+                </div>
+              </div>
+            </div>
+          </header>
+
+          {/* Contenido Principal */}
+          <main className="min-h-[calc(100vh-4rem)] bg-muted/30">
+            <div className="container mx-auto p-6 md:p-8">
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/ventas" element={<VentasPage />} />
+                <Route path="/historial" element={<HistorialPage />} />
+                <Route path="/platos" element={<PlatosPage />} />
+                <Route path="/venta/:id" element={<DetalleVentaPage />} />
+              </Routes>
+            </div>
+          </main>
         </div>
-      </SidebarProvider>
+      </div>
       <Toaster position="top-right" richColors />
     </BrowserRouter>
   )
