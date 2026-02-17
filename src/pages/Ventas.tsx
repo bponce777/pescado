@@ -64,6 +64,7 @@ export function Ventas() {
         paid: 0,
         balance: total,
         customer_name: customerName.trim(),
+        order_source: 'admin',
         notes: notes || null
       })
 

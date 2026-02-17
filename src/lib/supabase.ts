@@ -54,6 +54,9 @@ export type Database = {
           paid: number
           balance: number
           customer_name: string
+          customer_phone: string | null
+          customer_address: string | null
+          order_source: 'admin' | 'public'
           notes: string | null
           created_at: string
           updated_at: string
@@ -67,6 +70,9 @@ export type Database = {
           paid?: number
           balance: number
           customer_name: string
+          customer_phone?: string | null
+          customer_address?: string | null
+          order_source?: 'admin' | 'public'
           notes?: string | null
           created_at?: string
           updated_at?: string
@@ -80,6 +86,9 @@ export type Database = {
           paid?: number
           balance?: number
           customer_name?: string
+          customer_phone?: string | null
+          customer_address?: string | null
+          order_source?: 'admin' | 'public'
           notes?: string | null
           created_at?: string
           updated_at?: string

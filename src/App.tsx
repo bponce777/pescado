@@ -32,6 +32,10 @@ import { LoginPage } from '@/pages/auth/LoginPage'
 import { RegisterPage } from '@/pages/auth/RegisterPage'
 import { UserManagementPage } from '@/pages/admin/UserManagementPage'
 
+// Public store imports
+import CatalogoPage from '@/pages/public/CatalogoPage'
+import CheckoutPage from '@/pages/public/CheckoutPage'
+
 type Dish = {
   id: number
   name: string
@@ -626,6 +630,7 @@ function VentasPage() {
         paid: payment,
         balance: total - payment,
         customer_name: customerName.trim(),
+        order_source: 'admin',
         notes: notes || null
       })
       .select()
@@ -2297,11 +2302,15 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          {/* Public Routes */}
+          {/* Public Store Routes - Completely Open (No Auth Required) */}
+          <Route path="/tienda" element={<CatalogoPage />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
+
+          {/* Auth Routes */}
           <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
           <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
 
-          {/* Protected Routes */}
+          {/* Protected Routes (Admin) */}
           <Route path="/*" element={<ProtectedRoute><AppLayout /></ProtectedRoute>} />
         </Routes>
         <Toaster position="top-right" richColors />
