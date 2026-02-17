@@ -999,9 +999,8 @@ function HistorialPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-            <History className="h-8 w-8" />
-            Historial de Ventas
+          <h2 className="text-3xl font-bold tracking-tight">
+            Deisy&Brian
           </h2>
           <p className="text-muted-foreground">
             Registro de todas las ventas
