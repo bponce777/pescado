@@ -39,19 +39,28 @@ type Dish = {
 }
 
 function AppSidebar() {
+  const currentPath = window.location.pathname
+
+  const menuItems = [
+    { href: '/', icon: Home, label: 'Dashboard', tooltip: 'Inicio' },
+    { href: '/ventas', icon: ShoppingCart, label: 'Nueva Venta', tooltip: 'Registrar venta' },
+    { href: '/historial', icon: History, label: 'Historial', tooltip: 'Ver historial' },
+    { href: '/platos', icon: UtensilsCrossed, label: 'Platos', tooltip: 'Gestionar platos' },
+  ]
+
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader>
+      <SidebarHeader className="border-b">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
+            <SidebarMenuButton size="lg" asChild className="hover:bg-accent">
               <a href="/">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground text-xl">
+                <div className="flex aspect-square size-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-sm text-2xl">
                   🐟
                 </div>
                 <div className="flex flex-col gap-0.5 leading-none">
-                  <span className="font-semibold">Es Pescado</span>
-                  <span className="text-xs">v1.0.0</span>
+                  <span className="font-bold text-lg">Es Pescado</span>
+                  <span className="text-xs text-muted-foreground font-medium">Sistema de Ventas</span>
                 </div>
               </a>
             </SidebarMenuButton>
@@ -59,58 +68,46 @@ function AppSidebar() {
         </SidebarMenu>
       </SidebarHeader>
 
-      <SidebarContent>
+      <SidebarContent className="px-2 py-4">
         <SidebarGroup>
-          <SidebarGroupLabel>Menú Principal</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider px-2 mb-2">
+            Navegación
+          </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Inicio">
-                  <a href="/">
-                    <Home />
-                    <span>Inicio</span>
-                  </a>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Nueva Venta">
-                  <a href="/ventas">
-                    <ShoppingCart />
-                    <span>Nueva Venta</span>
-                  </a>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Historial">
-                  <a href="/historial">
-                    <History />
-                    <span>Historial</span>
-                  </a>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Platos">
-                  <a href="/platos">
-                    <UtensilsCrossed />
-                    <span>Platos</span>
-                  </a>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+            <SidebarMenu className="space-y-1">
+              {menuItems.map((item) => {
+                const Icon = item.icon
+                const isActive = currentPath === item.href
+                return (
+                  <SidebarMenuItem key={item.href}>
+                    <SidebarMenuButton
+                      asChild
+                      tooltip={item.tooltip}
+                      className={isActive ? 'bg-accent text-accent-foreground font-semibold' : 'hover:bg-accent/50'}
+                    >
+                      <a href={item.href} className="gap-3">
+                        <Icon className={isActive ? 'h-5 w-5' : 'h-4 w-4'} />
+                        <span>{item.label}</span>
+                      </a>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="sm">
-              <span className="text-xs text-muted-foreground">
-                © 2026 Es Pescado
-              </span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+      <SidebarFooter className="border-t p-4">
+        <div className="flex flex-col gap-2 text-center">
+          <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+            <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
+            <span>Sistema Activo</span>
+          </div>
+          <span className="text-xs text-muted-foreground font-medium">
+            © 2026 Es Pescado
+          </span>
+        </div>
       </SidebarFooter>
     </Sidebar>
   )
@@ -473,15 +470,15 @@ function VentasPage() {
   const balance = total - payment
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto px-4 md:px-0">
-      <div>
+    <div className="space-y-6 max-w-5xl mx-auto px-4 md:px-6">
+      <div className="text-center md:text-left">
         <h2 className="text-3xl font-bold tracking-tight">Nueva Venta</h2>
         <p className="text-muted-foreground">
           Registra una nueva venta en el sistema
         </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
         <Card className="md:col-span-2">
           <CardHeader>
             <CardTitle>Información de la Venta</CardTitle>
@@ -514,25 +511,6 @@ function VentasPage() {
                   </SelectContent>
                 </Select>
               </div>
-
-              {selectedDish && (
-                <div className="p-4 border rounded-lg bg-primary/5">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-primary/10 text-2xl">
-                        🐟
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-lg">{selectedDish.name}</h3>
-                        <p className="text-sm text-muted-foreground">{selectedDish.description}</p>
-                      </div>
-                    </div>
-                    <Badge className="text-lg px-4 py-2">
-                      ${selectedDish.price.toLocaleString('es-CO')}
-                    </Badge>
-                  </div>
-                </div>
-              )}
 
               <div className="space-y-2">
                 <Label htmlFor="customer">
