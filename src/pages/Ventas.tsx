@@ -8,9 +8,12 @@ import { Badge } from '@/components/ui/badge'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
+import { FishLoader } from '@/components/FishLoader'
 
 export function Ventas() {
   const navigate = useNavigate()
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSaving, setIsSaving] = useState(false)
   const [quantity, setQuantity] = useState(1)
   const [customerName, setCustomerName] = useState('')
   const [notes, setNotes] = useState('')
@@ -18,6 +21,7 @@ export function Ventas() {
 
   useEffect(() => {
     const loadDefaultDish = async () => {
+      setIsLoading(true)
       const { data, error } = await supabase
         .from('dishes')
         .select('*')
@@ -28,10 +32,12 @@ export function Ventas() {
       if (error) {
         console.error('Error loading dish:', error)
         toast.error('Error al cargar plato')
+        setIsLoading(false)
         return
       }
 
       setDefaultDish(data)
+      setIsLoading(false)
     }
 
     loadDefaultDish()
@@ -45,6 +51,7 @@ export function Ventas() {
       return
     }
 
+    setIsSaving(true)
     const total = quantity * defaultDish.price
 
     const { error } = await supabase
@@ -63,6 +70,7 @@ export function Ventas() {
     if (error) {
       console.error('Error creating sale:', error)
       toast.error('Error al registrar venta')
+      setIsSaving(false)
       return
     }
 
@@ -72,14 +80,25 @@ export function Ventas() {
     setQuantity(1)
     setCustomerName('')
     setNotes('')
+    setIsSaving(false)
 
     setTimeout(() => navigate('/historial'), 1000)
   }
 
   const total = defaultDish ? quantity * defaultDish.price : 0
 
+  if (isLoading) {
+    return <FishLoader text="Cargando plato..." />
+  }
+
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
+    <>
+      {isSaving && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
+          <FishLoader text="Guardando venta..." size="lg" />
+        </div>
+      )}
+      <div className="space-y-6 max-w-4xl mx-auto">
       <div>
         <h2 className="text-3xl font-bold tracking-tight">Nueva Venta</h2>
         <p className="text-muted-foreground">
@@ -220,5 +239,6 @@ export function Ventas() {
         </div>
       </div>
     </div>
+    </>
   )
 }

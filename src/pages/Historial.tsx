@@ -6,8 +6,10 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
+import { FishLoader } from '@/components/FishLoader'
 
 export function Historial() {
+  const [isLoading, setIsLoading] = useState(true)
   const [sales, setSales] = useState<any[]>([])
 
   useEffect(() => {
@@ -15,6 +17,7 @@ export function Historial() {
   }, [])
 
   const loadSales = async () => {
+    setIsLoading(true)
     const { data, error } = await supabase
       .from('sales')
       .select('*')
@@ -23,10 +26,12 @@ export function Historial() {
     if (error) {
       console.error('Error loading sales:', error)
       toast.error('Error al cargar ventas')
+      setIsLoading(false)
       return
     }
 
     setSales(data || [])
+    setIsLoading(false)
   }
 
   const handleDeleteSale = async (id: number) => {
@@ -66,6 +71,10 @@ export function Historial() {
   }
 
   const totalSales = sales.reduce((sum, sale) => sum + sale.total, 0)
+
+  if (isLoading) {
+    return <FishLoader text="Cargando ventas..." />
+  }
 
   return (
     <div className="space-y-6">

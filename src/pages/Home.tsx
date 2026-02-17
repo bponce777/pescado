@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
+import { FishLoader } from '@/components/FishLoader'
 
 const DEFAULT_PRODUCT = {
   name: 'Pescado con arroz',
@@ -16,6 +17,7 @@ const DEFAULT_PRODUCT = {
 
 export function Home() {
   const navigate = useNavigate()
+  const [isLoading, setIsLoading] = useState(true)
   const [stats, setStats] = useState({
     totalSales: 0,
     totalRevenue: 0,
@@ -24,6 +26,7 @@ export function Home() {
 
   useEffect(() => {
     const loadStats = async () => {
+      setIsLoading(true)
       const { data: sales, error } = await supabase
         .from('sales')
         .select('*')
@@ -31,6 +34,7 @@ export function Home() {
       if (error) {
         console.error('Error loading stats:', error)
         toast.error('Error al cargar estadísticas')
+        setIsLoading(false)
         return
       }
 
@@ -44,10 +48,15 @@ export function Home() {
         totalRevenue: sales?.reduce((sum: number, sale: any) => sum + sale.total, 0) || 0,
         todaySales: todaySales.length
       })
+      setIsLoading(false)
     }
 
     loadStats()
   }, [])
+
+  if (isLoading) {
+    return <FishLoader text="Cargando estadísticas..." />
+  }
 
   return (
     <div className="space-y-6">
