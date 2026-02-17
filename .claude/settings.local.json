@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(claude mcp --help:*)",
+      "Bash(test:*)",
+      "mcp__shadcn__get_project_registries",
+      "mcp__shadcn__search_items_in_registries",
+      "mcp__shadcn__get_add_command_for_items",
+      "Bash(npx shadcn@latest add:*)",
+      "Bash(npx shadcn@latest init:*)",
+      "Bash(npm install:*)",
+      "Bash(npx tailwindcss init:*)",
+      "Bash(npm exec:*)",
+      "Bash(npm run dev:*)",
+      "Bash(find:*)",
+      "Bash(pkill:*)",
+      "Bash(if [ ! -f .gitignore ])",
+      "Bash(then cat)",
+      "Bash(.gitignore:*)",
+      "Bash(else)",
+      "Bash(fi)",
+      "Bash(SUPABASE_SETUP.md:*)"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "shadcn"
+  ]
+}
