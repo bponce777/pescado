@@ -54,7 +54,7 @@ export function RegisterPage() {
 
     setLoading(true)
     try {
-      await signUp(email, password)
+      await signUp(email, password, role)
       setTimeout(() => navigate('/login'), 2000)
     } catch (error: any) {
       console.error('Error signing up:', error)
