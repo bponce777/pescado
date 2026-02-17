@@ -216,14 +216,14 @@ function HomePage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
           <p className="text-muted-foreground">
             Bienvenido a Es Pescado
           </p>
         </div>
-        <Button onClick={generatePDF} size="lg">
+        <Button onClick={generatePDF} size="lg" className="w-full md:w-auto">
           <FileDown className="mr-2 h-5 w-5" />
           Descargar PDF
         </Button>
@@ -471,7 +471,7 @@ function VentasPage() {
   const balance = total - payment
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
+    <div className="space-y-6 max-w-4xl mx-auto px-4 md:px-0">
       <div>
         <h2 className="text-3xl font-bold tracking-tight">Nueva Venta</h2>
         <p className="text-muted-foreground">
@@ -801,7 +801,7 @@ function PlatosPage() {
   }
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
+    <div className="space-y-6 max-w-5xl mx-auto px-4 md:px-0">
       <div>
         <h2 className="text-3xl font-bold tracking-tight">Gestión de Platos</h2>
         <p className="text-muted-foreground">
@@ -1226,7 +1226,7 @@ function DetalleVentaPage() {
   }
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
+    <div className="space-y-6 max-w-5xl mx-auto px-4 md:px-0">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Detalle de Venta</h2>
@@ -1419,7 +1419,7 @@ function App() {
               <h1 className="text-xl font-semibold">🐟 Es Pescado</h1>
             </header>
             <main className="flex-1 overflow-auto">
-              <div className="p-6">
+              <div className="p-4 md:p-6">
                 <Routes>
                   <Route path="/" element={<HomePage />} />
                   <Route path="/ventas" element={<VentasPage />} />
