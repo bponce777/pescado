@@ -59,7 +59,7 @@ function AppSidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
             🐟
           </div>
           <div className="flex flex-col min-w-0">
-            <span className="font-bold text-lg leading-tight truncate">Deisy&Brian</span>
+            <span className="brand-name text-lg leading-tight truncate">Deisy&Brian</span>
             <span className="text-xs text-muted-foreground font-medium">CRM Ventas</span>
           </div>
         </div>
@@ -97,7 +97,7 @@ function AppSidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
             <span className="font-medium">Sistema Activo</span>
           </div>
           <p className="mt-2 text-center text-xs text-muted-foreground font-medium">
-            © 2026 Deisy&Brian
+            © 2026 <span className="">Derechos reservados</span>
           </p>
         </div>
       </aside>
@@ -270,12 +270,8 @@ function HomePage() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">Dashboard</h1>
         <p className="mt-1 text-sm text-muted-foreground sm:mt-2 sm:text-base">
-          Bienvenido a Deisy&Brian
+          Bienvenido a <span className="brand-name">Deisy&Brian</span>
         </p>
-        <Button onClick={generatePDF} size="lg" className="mt-4 w-full sm:w-auto">
-          <FileDown className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-          Descargar PDF
-        </Button>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -1312,6 +1308,8 @@ function HistorialPage() {
 function ReportesPage() {
   const [sales, setSales] = useState<any[]>([])
   const [filterStatus, setFilterStatus] = useState<string>('all')
+  const [filterClient, setFilterClient] = useState<string>('all')
+  const [filterProduct, setFilterProduct] = useState<string>('all')
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -1336,12 +1334,24 @@ function ReportesPage() {
     setIsLoading(false)
   }
 
+  // Extraer clientes y productos únicos
+  const uniqueClients = Array.from(new Set(sales.map(sale => sale.customer_name).filter(Boolean))).sort()
+  const uniqueProducts = Array.from(new Set(sales.map(sale => sale.product).filter(Boolean))).sort()
+
   const filteredSales = sales.filter(sale => {
-    if (filterStatus === 'all') return true
-    if (filterStatus === 'paid') return sale.balance === 0
-    if (filterStatus === 'partial') return sale.paid > 0 && sale.balance > 0
-    if (filterStatus === 'pending') return sale.paid === 0
-    return true
+    // Filtro por estado
+    let statusMatch = true
+    if (filterStatus === 'paid') statusMatch = sale.balance === 0
+    else if (filterStatus === 'partial') statusMatch = sale.paid > 0 && sale.balance > 0
+    else if (filterStatus === 'pending') statusMatch = sale.paid === 0
+
+    // Filtro por cliente
+    const clientMatch = filterClient === 'all' || sale.customer_name === filterClient
+
+    // Filtro por producto
+    const productMatch = filterProduct === 'all' || sale.product === filterProduct
+
+    return statusMatch && clientMatch && productMatch
   })
 
   const generateFilteredPDF = async () => {
@@ -1363,12 +1373,15 @@ function ReportesPage() {
     doc.setFontSize(12)
     doc.text('Reporte de Ventas', 14, 28)
 
-    // Filtro aplicado
-    const filterLabel = filterStatus === 'all' ? 'Todas' :
-                        filterStatus === 'paid' ? 'Pagadas' :
-                        filterStatus === 'partial' ? 'Pago Parcial' : 'Pendientes'
+    // Filtros aplicados
+    const statusLabel = filterStatus === 'all' ? 'Todos' :
+                        filterStatus === 'paid' ? 'Pagado' :
+                        filterStatus === 'partial' ? 'Pago Parcial' : 'Pendiente'
+    const clientLabel = filterClient === 'all' ? 'Todos' : filterClient
+    const productLabel = filterProduct === 'all' ? 'Todos' : filterProduct
+
     doc.setFontSize(10)
-    doc.text(`Filtro: ${filterLabel}`, 14, 35)
+    doc.text(`Estado: ${statusLabel} | Cliente: ${clientLabel} | Producto: ${productLabel}`, 14, 35)
     doc.text(`Generado: ${new Date().toLocaleString('es-CO')}`, 14, 42)
 
     // Estadísticas
@@ -1412,7 +1425,7 @@ function ReportesPage() {
       }
     })
 
-    const fileName = `reporte-${filterLabel.toLowerCase().replace(' ', '-')}-${Date.now()}.pdf`
+    const fileName = `reporte-ventas-${Date.now()}.pdf`
     doc.save(fileName)
     toast.success('Reporte descargado exitosamente')
   }
@@ -1441,28 +1454,82 @@ function ReportesPage() {
 
       {/* Filtros */}
       <Card>
-        <CardContent className="pt-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <div className="flex items-center gap-3">
-                <Filter className="h-5 w-5 text-muted-foreground" />
-                <label className="text-sm font-medium">Filtrar por estado:</label>
-              </div>
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-2">
+            <Filter className="h-5 w-5 text-primary" />
+            <CardTitle className="text-base">Filtros de Búsqueda</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {/* Filtro por Estado */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-muted-foreground">Estado de Pago</label>
               <Select value={filterStatus} onValueChange={setFilterStatus}>
-                <SelectTrigger className="w-full sm:w-[200px]">
+                <SelectTrigger className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="all">Todos los estados</SelectItem>
                   <SelectItem value="paid">Pagado</SelectItem>
                   <SelectItem value="partial">Pago Parcial</SelectItem>
                   <SelectItem value="pending">Pendiente</SelectItem>
                 </SelectContent>
               </Select>
             </div>
+
+            {/* Filtro por Cliente */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-muted-foreground">Cliente</label>
+              <Select value={filterClient} onValueChange={setFilterClient}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos los clientes</SelectItem>
+                  {uniqueClients.map(client => (
+                    <SelectItem key={client} value={client}>{client}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Filtro por Producto */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-muted-foreground">Producto</label>
+              <Select value={filterProduct} onValueChange={setFilterProduct}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos los productos</SelectItem>
+                  {uniqueProducts.map(product => (
+                    <SelectItem key={product} value={product}>{product}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Contador de resultados */}
+          <div className="mt-4 pt-4 border-t flex items-center justify-between">
             <span className="text-sm text-muted-foreground">
-              {filteredSales.length} de {sales.length} ventas
+              Mostrando <span className="font-semibold text-foreground">{filteredSales.length}</span> de <span className="font-semibold text-foreground">{sales.length}</span> ventas
             </span>
+            {(filterStatus !== 'all' || filterClient !== 'all' || filterProduct !== 'all') && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setFilterStatus('all')
+                  setFilterClient('all')
+                  setFilterProduct('all')
+                }}
+                className="text-xs"
+              >
+                Limpiar filtros
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -1476,7 +1543,7 @@ function ReportesPage() {
           <CardContent>
             <div className="text-2xl font-bold sm:text-3xl">{filteredSales.length}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              {filterStatus !== 'all' ? 'Filtradas' : 'Totales'}
+              {(filterStatus !== 'all' || filterClient !== 'all' || filterProduct !== 'all') ? 'Con filtros aplicados' : 'Todas las ventas'}
             </p>
           </CardContent>
         </Card>
@@ -1490,7 +1557,7 @@ function ReportesPage() {
               ${totalIngresos.toLocaleString('es-CO')}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              Monto total
+              Monto {(filterStatus !== 'all' || filterClient !== 'all' || filterProduct !== 'all') ? 'filtrado' : 'total'}
             </p>
           </CardContent>
         </Card>
@@ -1504,7 +1571,7 @@ function ReportesPage() {
               ${totalPendiente.toLocaleString('es-CO')}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              Por cobrar
+              Por cobrar {(filterStatus !== 'all' || filterClient !== 'all' || filterProduct !== 'all') ? '(filtrado)' : '(total)'}
             </p>
           </CardContent>
         </Card>
@@ -1515,10 +1582,20 @@ function ReportesPage() {
         <CardHeader>
           <CardTitle>Listado de Ventas</CardTitle>
           <CardDescription>
-            {filterStatus === 'all' ? 'Todas las ventas registradas' :
-             filterStatus === 'paid' ? 'Ventas completamente pagadas' :
-             filterStatus === 'partial' ? 'Ventas con pago parcial' :
-             'Ventas pendientes de pago'}
+            {(() => {
+              const filters = []
+              if (filterStatus !== 'all') {
+                const statusText = filterStatus === 'paid' ? 'pagadas' :
+                                 filterStatus === 'partial' ? 'con pago parcial' : 'pendientes'
+                filters.push(`estado: ${statusText}`)
+              }
+              if (filterClient !== 'all') filters.push(`cliente: ${filterClient}`)
+              if (filterProduct !== 'all') filters.push(`producto: ${filterProduct}`)
+
+              return filters.length > 0
+                ? `Filtrado por ${filters.join(', ')}`
+                : 'Todas las ventas registradas'
+            })()}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -1922,7 +1999,7 @@ function App() {
                   <div className="hidden h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/80 text-xl sm:flex lg:hidden">
                     🐟
                   </div>
-                  <h1 className="text-base font-semibold sm:text-lg">Deisy&Brian</h1>
+                  <h1 className="brand-name text-base sm:text-lg">Deisy&Brian</h1>
                 </div>
               </div>
 
