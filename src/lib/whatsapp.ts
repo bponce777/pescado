@@ -27,7 +27,6 @@ export async function getWhatsAppNumber(): Promise<string | null> {
 export function formatOrderMessage(order: {
   id: number
   customerName: string
-  customerPhone: string
   customerAddress: string
   product: string
   quantity: number
@@ -38,7 +37,6 @@ export function formatOrderMessage(order: {
   return `🐟 *Nuevo Pedido #${order.id}*
 
 *Cliente:* ${order.customerName}
-*Teléfono:* ${order.customerPhone}
 *Dirección:* ${order.customerAddress}
 
 *Producto:* ${order.product}

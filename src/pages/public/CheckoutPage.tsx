@@ -23,7 +23,6 @@ export default function CheckoutPage() {
   const state = location.state as CheckoutState | null
 
   const [name, setName] = useState('')
-  const [phone, setPhone] = useState('')
   const [address, setAddress] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -38,7 +37,7 @@ export default function CheckoutPage() {
   const total = state ? state.price * state.quantity : 0
 
   // Validar formulario
-  const isFormValid = name.trim() !== '' && phone.trim() !== '' && address.trim() !== ''
+  const isFormValid = name.trim() !== '' && address.trim() !== ''
 
   async function handleConfirmOrder() {
     if (!state) {
@@ -65,7 +64,7 @@ export default function CheckoutPage() {
           paid: 0,
           balance: total,
           customer_name: name.trim(),
-          customer_phone: phone.trim(),
+          customer_phone: null,
           customer_address: address.trim(),
           order_source: 'public',
           notes: 'Pedido desde tienda pública'
@@ -98,7 +97,6 @@ export default function CheckoutPage() {
       const message = formatOrderMessage({
         id: sale.id,
         customerName: name.trim(),
-        customerPhone: phone.trim(),
         customerAddress: address.trim(),
         product: state.dishName,
         quantity: state.quantity,
@@ -188,18 +186,6 @@ export default function CheckoutPage() {
                   placeholder="Ej: Juan Pérez"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  disabled={loading}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="phone">Teléfono *</Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  placeholder="Ej: 3001234567"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
                   disabled={loading}
                 />
               </div>
