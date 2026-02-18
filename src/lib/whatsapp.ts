@@ -30,8 +30,18 @@ export function formatOrderMessage(order: {
   product: string
   quantity: number
   total: number
+  paymentMethod: 'Nequi' | 'Efectivo'
+  billAmount?: number
 }): string {
   const formattedTotal = order.total.toLocaleString('es-CO')
+
+  let paymentInfo = `*Método de pago:* ${order.paymentMethod}`
+  if (order.paymentMethod === 'Efectivo' && order.billAmount) {
+    const formattedBill = order.billAmount.toLocaleString('es-CO')
+    const change = order.billAmount - order.total
+    const formattedChange = change.toLocaleString('es-CO')
+    paymentInfo += `\n*Billete:* $${formattedBill}\n*Cambio:* $${formattedChange}`
+  }
 
   return `🐟 *Nuevo Pedido desde la Tienda Online*
 
@@ -41,6 +51,8 @@ export function formatOrderMessage(order: {
 *Producto:* ${order.product}
 *Cantidad:* ${order.quantity}
 *Total:* $${formattedTotal}
+
+${paymentInfo}
 
 _Por favor confirma tu pedido respondiendo este mensaje._`
 }

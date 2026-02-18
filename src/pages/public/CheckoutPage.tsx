@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { getWhatsAppNumber, formatOrderMessage, getWhatsAppUrl } from '@/lib/whatsapp'
 import { toast } from 'sonner'
 
@@ -23,6 +24,8 @@ export default function CheckoutPage() {
 
   const [name, setName] = useState('')
   const [address, setAddress] = useState('')
+  const [paymentMethod, setPaymentMethod] = useState<'Nequi' | 'Efectivo' | ''>('')
+  const [billAmount, setBillAmount] = useState('')
   const [loading, setLoading] = useState(false)
 
   // Validar que existe el state
@@ -35,8 +38,26 @@ export default function CheckoutPage() {
   // Calcular total
   const total = state ? state.price * state.quantity : 0
 
+  // Funciones para formatear moneda
+  const formatCurrency = (value: string): string => {
+    const numbers = value.replace(/\D/g, '')
+    if (!numbers) return ''
+    return parseInt(numbers).toLocaleString('es-CO')
+  }
+
+  const parseCurrency = (value: string): number => {
+    return parseInt(value.replace(/\./g, '') || '0')
+  }
+
   // Validar formulario
-  const isFormValid = name.trim() !== '' && address.trim() !== ''
+  const isFormValid =
+    name.trim() !== '' &&
+    address.trim() !== '' &&
+    paymentMethod !== '' &&
+    (paymentMethod === 'Nequi' ||
+     (paymentMethod === 'Efectivo' &&
+      billAmount.trim() !== '' &&
+      parseCurrency(billAmount) >= total))
 
   async function handleConfirmOrder() {
     if (!state) {
@@ -67,7 +88,9 @@ export default function CheckoutPage() {
         customerAddress: address.trim(),
         product: state.dishName,
         quantity: state.quantity,
-        total: total
+        total: total,
+        paymentMethod: paymentMethod,
+        billAmount: paymentMethod === 'Efectivo' ? parseCurrency(billAmount) : undefined
       })
 
       // 3. Generar URL de WhatsApp
@@ -166,6 +189,55 @@ export default function CheckoutPage() {
                   disabled={loading}
                 />
               </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="payment">Método de pago *</Label>
+                <Select
+                  value={paymentMethod}
+                  onValueChange={(value: 'Nequi' | 'Efectivo') => {
+                    setPaymentMethod(value)
+                    if (value === 'Nequi') {
+                      setBillAmount('')
+                    }
+                  }}
+                  disabled={loading}
+                >
+                  <SelectTrigger id="payment">
+                    <SelectValue placeholder="Selecciona método de pago" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Nequi">Nequi</SelectItem>
+                    <SelectItem value="Efectivo">Efectivo</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {paymentMethod === 'Efectivo' && (
+                <div className="space-y-2">
+                  <Label htmlFor="bill">Billete a pagar *</Label>
+                  <Input
+                    id="bill"
+                    type="text"
+                    placeholder="Ej: 50.000"
+                    value={billAmount}
+                    onChange={(e) => {
+                      const formatted = formatCurrency(e.target.value)
+                      setBillAmount(formatted)
+                    }}
+                    disabled={loading}
+                  />
+                  {billAmount && parseCurrency(billAmount) < total && (
+                    <p className="text-sm text-red-500">
+                      El billete debe ser mayor o igual al total
+                    </p>
+                  )}
+                  {billAmount && parseCurrency(billAmount) >= total && (
+                    <p className="text-sm text-green-600">
+                      Cambio: ${(parseCurrency(billAmount) - total).toLocaleString('es-CO')}
+                    </p>
+                  )}
+                </div>
+              )}
 
               <p className="text-sm text-gray-500">
                 * Campos obligatorios
