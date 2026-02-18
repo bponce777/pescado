@@ -43,6 +43,7 @@ CREATE POLICY "Public users can view active dishes" ON dishes
 DROP POLICY IF EXISTS "Public users can create orders" ON sales;
 CREATE POLICY "Public users can create orders" ON sales
   FOR INSERT
+  TO anon, authenticated
   WITH CHECK (order_source = 'public');
 
 -- Nota: Las políticas existentes para usuarios autenticados permanecen intactas

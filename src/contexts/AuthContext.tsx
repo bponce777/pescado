@@ -64,13 +64,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .from('profiles')
       .select('*')
       .eq('id', userId)
-      .single()
+      .maybeSingle()
 
     if (error) {
       console.error('Error loading profile:', error)
       setProfile(null)
-    } else {
+    } else if (data) {
       setProfile(data)
+    } else {
+      console.warn('Profile not found for user:', userId)
+      setProfile(null)
     }
     setLoading(false)
   }
@@ -83,15 +86,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     if (error) throw error
 
-    // Verificar si el usuario está activo
+    // Verificar si el usuario está activo (forzar recarga sin caché)
     if (data.user) {
-      const { data: profileData } = await supabase
+      // Pequeño delay para asegurar que los datos estén sincronizados
+      await new Promise(resolve => setTimeout(resolve, 100))
+
+      const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('is_active')
         .eq('id', data.user.id)
-        .single()
+        .maybeSingle()
 
-      if (!profileData?.is_active) {
+      if (profileError) {
+        console.error('Error loading profile:', profileError)
+        await supabase.auth.signOut()
+        throw new Error('Error al verificar el perfil. Contacta al administrador.')
+      }
+
+      if (!profileData) {
+        await supabase.auth.signOut()
+        throw new Error('Perfil no encontrado. Contacta al administrador.')
+      }
+
+      if (!profileData.is_active) {
         await supabase.auth.signOut()
         throw new Error('Tu cuenta está inactiva. Contacta al administrador.')
       }
