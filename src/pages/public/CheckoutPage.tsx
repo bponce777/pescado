@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
-import { supabase } from '@/lib/supabase'
 import { getWhatsAppNumber, formatOrderMessage, getWhatsAppUrl } from '@/lib/whatsapp'
 import { toast } from 'sonner'
 
@@ -53,49 +52,17 @@ export default function CheckoutPage() {
     try {
       setLoading(true)
 
-      // 1. Guardar pedido en la base de datos
-      const { data: sale, error: saleError } = await supabase
-        .from('sales')
-        .insert({
-          product: state.dishName,
-          quantity: state.quantity,
-          price: state.price,
-          total: total,
-          paid: 0,
-          balance: total,
-          customer_name: name.trim(),
-          customer_phone: null,
-          customer_address: address.trim(),
-          order_source: 'public',
-          notes: 'Pedido desde tienda pública'
-        })
-        .select()
-        .single()
-
-      if (saleError) {
-        console.error('Error creating sale:', saleError)
-        throw new Error('Error al guardar el pedido')
-      }
-
-      if (!sale) {
-        throw new Error('No se pudo crear el pedido')
-      }
-
-      // 2. Obtener número de WhatsApp
+      // 1. Obtener número de WhatsApp
       const whatsappNumber = await getWhatsAppNumber()
 
       if (!whatsappNumber) {
-        toast.success('¡Pedido registrado exitosamente!')
-        toast.info('Nos pondremos en contacto contigo pronto')
-        setTimeout(() => {
-          navigate('/tienda')
-        }, 2000)
+        toast.error('WhatsApp no configurado. Por favor contacta al administrador.')
+        setLoading(false)
         return
       }
 
-      // 3. Formatear mensaje
+      // 2. Formatear mensaje
       const message = formatOrderMessage({
-        id: sale.id,
         customerName: name.trim(),
         customerAddress: address.trim(),
         product: state.dishName,
@@ -103,21 +70,19 @@ export default function CheckoutPage() {
         total: total
       })
 
-      // 4. Generar URL de WhatsApp
+      // 3. Generar URL de WhatsApp
       const whatsappUrl = getWhatsAppUrl(whatsappNumber, message)
 
-      // 5. Mostrar éxito y redirigir
-      toast.success('¡Pedido registrado exitosamente!')
-      toast.info('Serás redirigido a WhatsApp...')
+      // 4. Redirigir a WhatsApp
+      toast.success('Redirigiendo a WhatsApp...')
 
       setTimeout(() => {
         window.location.href = whatsappUrl
-      }, 1500)
+      }, 800)
 
     } catch (error) {
       console.error('Error confirming order:', error)
-      toast.error(error instanceof Error ? error.message : 'Error al confirmar el pedido')
-    } finally {
+      toast.error('Error al procesar el pedido')
       setLoading(false)
     }
   }

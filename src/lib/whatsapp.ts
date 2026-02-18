@@ -25,7 +25,6 @@ export async function getWhatsAppNumber(): Promise<string | null> {
  * @returns Mensaje formateado para WhatsApp
  */
 export function formatOrderMessage(order: {
-  id: number
   customerName: string
   customerAddress: string
   product: string
@@ -34,7 +33,7 @@ export function formatOrderMessage(order: {
 }): string {
   const formattedTotal = order.total.toLocaleString('es-CO')
 
-  return `🐟 *Nuevo Pedido #${order.id}*
+  return `🐟 *Nuevo Pedido desde la Tienda Online*
 
 *Cliente:* ${order.customerName}
 *Dirección:* ${order.customerAddress}
@@ -43,7 +42,7 @@ export function formatOrderMessage(order: {
 *Cantidad:* ${order.quantity}
 *Total:* $${formattedTotal}
 
-_Pedido realizado desde la tienda online._`
+_Por favor confirma tu pedido respondiendo este mensaje._`
 }
 
 /**
