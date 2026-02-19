@@ -93,8 +93,8 @@ function AppSidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
       >
         {/* Header del Sidebar */}
         <div className="flex h-16 items-center gap-3 border-b px-6">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/80 text-2xl shadow-sm">
-            🐟
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg overflow-hidden border shadow-sm bg-white">
+            <img src="/logo.png" alt="Deysi Restaurante" className="h-full w-full object-contain" />
           </div>
           <div className="flex flex-col min-w-0">
             <span className="brand-name text-lg leading-tight truncate">DeisyRestaurant</span>
@@ -2222,8 +2222,8 @@ function AppHeader() {
             <Menu className="h-5 w-5" />
           </Button>
           <div className="flex items-center gap-2">
-            <div className="hidden h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/80 text-xl sm:flex lg:hidden">
-              🐟
+            <div className="hidden h-8 w-8 items-center justify-center rounded-lg overflow-hidden border bg-white sm:flex lg:hidden">
+              <img src="/logo.png" alt="Deysi Restaurante" className="h-full w-full object-contain" />
             </div>
             <h1 className="brand-name text-base sm:text-lg">DeisyRestaurant</h1>
           </div>

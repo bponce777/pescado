@@ -92,8 +92,9 @@ export default function CatalogoPage() {
       <div className="bg-white border-b shadow-sm">
         <div className="container mx-auto px-4 py-6">
           <div className="text-center">
+            <img src="/logo.png" alt="Deysi Restaurante" className="mx-auto mb-3 h-24 w-24 object-contain" />
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              🐟 DeisyRestaurant
+              DeisyRestaurant
             </h1>
             <p className="text-lg text-gray-600">Nuestro Menú</p>
             <p className="text-sm text-gray-500 mt-1">

@@ -50,23 +50,19 @@ export function SplashScreen({ onFinish }: SplashScreenProps) {
       {/* Central content */}
       <div className="splash-content">
 
-        {/* Logo + pulse rings */}
+        {/* Logo card + pulse rings */}
         <div className="splash-logo-wrap">
           <span className="splash-ring splash-ring-1" />
           <span className="splash-ring splash-ring-2" />
-          <img
-            src="/logo.png"
-            alt="DeisyRestaurant"
-            width={120}
-            height={120}
-            className="splash-logo"
-          />
-        </div>
-
-        {/* Brand name */}
-        <div className="splash-brand">
-          <span className="splash-brand-deisy">Deisy</span>
-          <span className="splash-brand-rest">Restaurant</span>
+          <div className="splash-logo-card">
+            <img
+              src="/logo.png"
+              alt="Deysi Restaurante"
+              width={200}
+              height={200}
+              className="splash-logo"
+            />
+          </div>
         </div>
 
         {/* Tagline */}
@@ -91,11 +87,11 @@ export function SplashScreen({ onFinish }: SplashScreenProps) {
             >
               <path
                 d="M0,45 C80,15 200,72 300,45 C400,18 520,65 600,45 L600,80 L0,80 Z"
-                fill="rgba(255,255,255,0.07)"
+                fill="rgba(30,60,200,0.05)"
               />
               <path
                 d="M0,60 C120,38 240,74 380,56 C480,42 560,68 600,60 L600,80 L0,80 Z"
-                fill="rgba(255,255,255,0.04)"
+                fill="rgba(30,60,200,0.03)"
               />
             </svg>
           ))}
