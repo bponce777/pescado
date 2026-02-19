@@ -75,7 +75,7 @@ export function RegisterPage() {
           </div>
           <div>
             <CardTitle className="text-2xl">
-              <span className="brand-name">Deisy&Brian</span>
+              <span className="brand-name">DeisyRestaurant</span>
             </CardTitle>
             <CardDescription className="text-base mt-2">
               Crea tu cuenta

@@ -97,7 +97,7 @@ function AppSidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
             🐟
           </div>
           <div className="flex flex-col min-w-0">
-            <span className="brand-name text-lg leading-tight truncate">Deisy&Brian</span>
+            <span className="brand-name text-lg leading-tight truncate">DeisyRestaurant</span>
             <span className="text-xs text-muted-foreground font-medium">CRM Ventas</span>
           </div>
         </div>
@@ -170,7 +170,7 @@ async function generatePDF() {
 
   // Título
   doc.setFontSize(20)
-  doc.text('Deisy&Brian', 14, 20)
+  doc.text('DeisyRestaurant', 14, 20)
   doc.setFontSize(12)
   doc.text('Reporte de Ventas', 14, 28)
   doc.setFontSize(10)
@@ -1555,7 +1555,7 @@ function ReportesPage() {
 
     // Título
     doc.setFontSize(20)
-    doc.text('Deisy&Brian', 14, 20)
+    doc.text('DeisyRestaurant', 14, 20)
     doc.setFontSize(12)
     doc.text('Reporte de Ventas', 14, 28)
 
@@ -2225,7 +2225,7 @@ function AppHeader() {
             <div className="hidden h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/80 text-xl sm:flex lg:hidden">
               🐟
             </div>
-            <h1 className="brand-name text-base sm:text-lg">Deisy&Brian</h1>
+            <h1 className="brand-name text-base sm:text-lg">DeisyRestaurant</h1>
           </div>
         </div>
 

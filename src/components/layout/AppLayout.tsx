@@ -1,4 +1,4 @@
-import { Outlet } from 'react-router-dom'
+import { Outlet, useLocation } from 'react-router-dom'
 import { Home, ShoppingCart, History, Menu, Package } from 'lucide-react'
 import {
   Sidebar,
@@ -17,6 +17,15 @@ import {
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 
+function AnimatedOutlet() {
+  const location = useLocation()
+  return (
+    <div key={location.pathname} className="page-enter flex-1 p-6">
+      <Outlet />
+    </div>
+  )
+}
+
 function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
@@ -29,7 +38,7 @@ function AppSidebar() {
                   <Package className="size-4" />
                 </div>
                 <div className="flex flex-col gap-0.5 leading-none">
-                  <span className="font-semibold">Sistema Ventas</span>
+                  <span className="font-semibold">DeisyRestaurant</span>
                   <span className="text-xs">v1.0.0</span>
                 </div>
               </a>
@@ -77,7 +86,7 @@ function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton size="sm">
               <span className="text-xs text-muted-foreground">
-                © 2026 Sistema Ventas
+                © 2026 DeisyRestaurant
               </span>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -101,11 +110,9 @@ export function AppLayout() {
               </Button>
             </SidebarTrigger>
             <Separator orientation="vertical" className="h-6" />
-            <h1 className="text-xl font-semibold">Sistema de Ventas</h1>
+            <h1 className="text-xl font-semibold brand-name">DeisyRestaurant</h1>
           </header>
-          <div className="flex-1 p-6">
-            <Outlet />
-          </div>
+          <AnimatedOutlet />
         </main>
       </div>
     </SidebarProvider>

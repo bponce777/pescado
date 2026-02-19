@@ -127,3 +127,240 @@ html,
   font-weight: 600;
   letter-spacing: 0.025em;
 }
+
+/* =========================================
+   SPLASH SCREEN
+   ========================================= */
+
+.splash-root {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: linear-gradient(160deg, #062828 0%, #0a5050 32%, #0d7c7c 62%, #0fa898 100%);
+  animation: splash-in 0.35s ease-out both;
+}
+
+.splash-exit {
+  animation: splash-out 0.65s ease-in forwards !important;
+}
+
+@keyframes splash-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes splash-out {
+  from { opacity: 1; transform: scale(1);    }
+  to   { opacity: 0; transform: scale(1.04); }
+}
+
+/* Bubbles */
+.splash-bubble {
+  position: absolute;
+  bottom: -50px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.10);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  animation: bubble-rise linear infinite;
+}
+
+@keyframes bubble-rise {
+  0%   { transform: translateY(0)      scale(1);   opacity: 0.6; }
+  40%  {                                            opacity: 0.4; }
+  100% { transform: translateY(-110vh) scale(0.4); opacity: 0;   }
+}
+
+/* Content wrapper */
+.splash-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 1;
+}
+
+/* Logo */
+.splash-logo-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+  animation: logo-enter 0.75s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.2s both;
+}
+
+.splash-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1.5px solid rgba(20, 210, 185, 0.45);
+  pointer-events: none;
+}
+
+.splash-ring-1 {
+  width: 150px;
+  height: 150px;
+  animation: ring-pulse 2.4s ease-in-out 0.9s infinite;
+}
+
+.splash-ring-2 {
+  width: 180px;
+  height: 180px;
+  animation: ring-pulse 2.4s ease-in-out 1.5s infinite;
+}
+
+.splash-logo {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 22px rgba(20, 210, 185, 0.6));
+  animation: logo-float 3.6s ease-in-out infinite;
+}
+
+@keyframes logo-enter {
+  from { opacity: 0; transform: scale(0.35) translateY(28px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0);    }
+}
+
+@keyframes logo-float {
+  0%, 100% { transform: translateY(0px)   rotate(-4deg); }
+  50%       { transform: translateY(-11px) rotate(4deg);  }
+}
+
+@keyframes ring-pulse {
+  0%   { transform: scale(0.92); opacity: 0.55; }
+  50%  { transform: scale(1.10); opacity: 0;    }
+  100% { transform: scale(0.92); opacity: 0.55; }
+}
+
+/* Brand name */
+.splash-brand {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+
+.splash-brand-deisy {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.9rem, 7vw, 2.4rem);
+  font-weight: 400;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.92);
+  letter-spacing: 0.02em;
+  animation: slide-from-left 0.55s ease-out 0.85s both;
+}
+
+.splash-brand-rest {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: clamp(1.9rem, 7vw, 2.4rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  background: linear-gradient(90deg, #ffffff 0%, #80fff2 50%, #ffffff 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: slide-from-right 0.55s ease-out 0.85s both,
+             shimmer-brand 2.8s linear 1.6s infinite;
+}
+
+/* Tagline */
+.splash-tagline {
+  margin-top: 10px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.45);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  animation: fade-up 0.5s ease-out 1.3s both;
+}
+
+/* Progress bar */
+.splash-track {
+  width: 96px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 2px;
+  margin-top: 38px;
+  overflow: hidden;
+  animation: fade-up 0.4s ease-out 1.5s both;
+}
+
+.splash-bar {
+  height: 100%;
+  width: 0%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #80fff2, #14cdb9, #80fff2);
+  background-size: 200% auto;
+  animation:
+    progress-grow 2.5s cubic-bezier(0.4, 0, 0.2, 1) 0.5s both,
+    shimmer-brand 1.2s linear 1s infinite;
+}
+
+/* Waves */
+.splash-waves {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  overflow: hidden;
+}
+
+.splash-wave-inner {
+  display: flex;
+  width: 200%;
+  height: 100%;
+  animation: wave-scroll 7s linear infinite;
+}
+
+/* =========================================
+   SHARED KEYFRAMES
+   ========================================= */
+
+@keyframes slide-from-left {
+  from { opacity: 0; transform: translateX(-22px); }
+  to   { opacity: 1; transform: translateX(0);     }
+}
+
+@keyframes slide-from-right {
+  from { opacity: 0; transform: translateX(22px); }
+  to   { opacity: 1; transform: translateX(0);    }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+@keyframes progress-grow {
+  from { width: 0%;   }
+  to   { width: 100%; }
+}
+
+@keyframes shimmer-brand {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+
+@keyframes wave-scroll {
+  0%   { transform: translateX(0);    }
+  100% { transform: translateX(-50%); }
+}
+
+/* =========================================
+   PAGE TRANSITIONS
+   ========================================= */
+
+.page-enter {
+  animation: page-fade-up 0.42s ease-out both;
+}
+
+@keyframes page-fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}

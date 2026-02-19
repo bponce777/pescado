@@ -93,7 +93,7 @@ export default function CatalogoPage() {
         <div className="container mx-auto px-4 py-6">
           <div className="text-center">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              🐟 Deisy&Brian
+              🐟 DeisyRestaurant
             </h1>
             <p className="text-lg text-gray-600">Nuestro Menú</p>
             <p className="text-sm text-gray-500 mt-1">
