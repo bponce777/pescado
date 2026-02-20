@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, useNavigate, useParams } from 'react-router-dom'
-import { Home, ShoppingCart, History, Menu, DollarSign, TrendingUp, Plus, Minus, Trash2, User, Eye, Banknote, FileDown, UtensilsCrossed, Filter, MoreVertical, Edit, Power, FileText, Users as UsersIcon, LogOut, CalendarIcon } from 'lucide-react'
+import { Home, ShoppingCart, History, Menu, DollarSign, TrendingUp, Plus, Minus, Trash2, User, Eye, Banknote, FileDown, UtensilsCrossed, Filter, MoreVertical, Edit, Power, FileText, Users as UsersIcon, LogOut, CalendarIcon, Package } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Button } from '@/components/ui/button'
@@ -31,6 +31,7 @@ import { PublicRoute } from '@/components/auth/PublicRoute'
 import { LoginPage } from '@/pages/auth/LoginPage'
 import { RegisterPage } from '@/pages/auth/RegisterPage'
 import { UserManagementPage } from '@/pages/admin/UserManagementPage'
+import { Inventario } from '@/pages/Inventario'
 
 // Public store imports
 import CatalogoPage from '@/pages/public/CatalogoPage'
@@ -69,6 +70,7 @@ function AppSidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
     { href: '/historial', icon: History, label: 'Historial' },
     { href: '/reportes', icon: FileText, label: 'Reportes' },
     { href: '/platos', icon: UtensilsCrossed, label: 'Platos' },
+    { href: '/inventario', icon: Package, label: 'Inventario' },
     { href: '/admin/usuarios', icon: UsersIcon, label: 'Usuarios', adminOnly: true },
   ]
 
@@ -94,10 +96,10 @@ function AppSidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
         {/* Header del Sidebar */}
         <div className="flex h-16 items-center gap-3 border-b px-6">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg overflow-hidden border shadow-sm bg-white">
-            <img src="/logo.png" alt="Deysi Restaurante" className="h-full w-full object-contain" />
+            <img src="/logo.png" alt="D&B Restaurante" className="h-full w-full object-contain" />
           </div>
           <div className="flex flex-col min-w-0">
-            <span className="brand-name text-lg leading-tight truncate">DeisyRestaurant</span>
+            <span className="brand-name text-lg leading-tight truncate">D&B Restaurante</span>
             <span className="text-xs text-muted-foreground font-medium">CRM Ventas</span>
           </div>
         </div>
@@ -170,7 +172,7 @@ async function generatePDF() {
 
   // Título
   doc.setFontSize(20)
-  doc.text('DeisyRestaurant', 14, 20)
+  doc.text('D&B Restaurante', 14, 20)
   doc.setFontSize(12)
   doc.text('Reporte de Ventas', 14, 28)
   doc.setFontSize(10)
@@ -476,7 +478,7 @@ function HomePage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              🐟 Plato del Día
+              Plato del Día
             </CardTitle>
             <CardDescription>Pescado con arroz disponible</CardDescription>
           </CardHeader>
@@ -1555,7 +1557,7 @@ function ReportesPage() {
 
     // Título
     doc.setFontSize(20)
-    doc.text('DeisyRestaurant', 14, 20)
+    doc.text('D&B Restaurante', 14, 20)
     doc.setFontSize(12)
     doc.text('Reporte de Ventas', 14, 28)
 
@@ -2223,9 +2225,9 @@ function AppHeader() {
           </Button>
           <div className="flex items-center gap-2">
             <div className="hidden h-8 w-8 items-center justify-center rounded-lg overflow-hidden border bg-white sm:flex lg:hidden">
-              <img src="/logo.png" alt="Deysi Restaurante" className="h-full w-full object-contain" />
+              <img src="/logo.png" alt="D&B Restaurante" className="h-full w-full object-contain" />
             </div>
-            <h1 className="brand-name text-base sm:text-lg">DeisyRestaurant</h1>
+            <h1 className="brand-name text-base sm:text-lg">D&B Restaurante</h1>
           </div>
         </div>
 
@@ -2287,6 +2289,7 @@ function AppLayout() {
               <Route path="/historial" element={<HistorialPage />} />
               <Route path="/reportes" element={<ReportesPage />} />
               <Route path="/platos" element={<PlatosPage />} />
+              <Route path="/inventario" element={<Inventario />} />
               <Route path="/venta/:id" element={<DetalleVentaPage />} />
               <Route path="/admin/usuarios" element={<AdminRoute><UserManagementPage /></AdminRoute>} />
             </Routes>

@@ -69,13 +69,13 @@ export function RegisterPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-3 text-center">
           <div className="flex justify-center">
-            <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-4xl shadow-lg">
-              🐟
+            <div className="h-20 w-20 rounded-2xl overflow-hidden border bg-white shadow-lg flex items-center justify-center">
+              <img src="/logo.png" alt="D&B Restaurante" className="h-full w-full object-contain" />
             </div>
           </div>
           <div>
             <CardTitle className="text-2xl">
-              <span className="brand-name">DeisyRestaurant</span>
+              <span className="brand-name">D&B Restaurante</span>
             </CardTitle>
             <CardDescription className="text-base mt-2">
               Crea tu cuenta

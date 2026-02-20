@@ -57,7 +57,7 @@ export function SplashScreen({ onFinish }: SplashScreenProps) {
           <div className="splash-logo-card">
             <img
               src="/logo.png"
-              alt="Deysi Restaurante"
+              alt="D&B Restaurante"
               width={200}
               height={200}
               className="splash-logo"

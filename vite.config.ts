@@ -18,9 +18,9 @@ export default defineConfig({
       },
       includeAssets: ['favicon.ico', 'apple-touch-icon-180x180.png', 'logo.png'],
       manifest: {
-        name: 'Brian - Restaurante',
-        short_name: 'Restaurante',
-        description: 'CRM de ventas para Brian - Restaurante',
+        name: 'D&B Restaurante',
+        short_name: 'D&B',
+        description: 'CRM de ventas D&B Restaurante',
         theme_color: '#18181b',
         background_color: '#18181b',
         display: 'standalone',

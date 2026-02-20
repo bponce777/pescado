@@ -154,6 +154,43 @@ export type Database = {
           value?: string
         }
       }
+      inventory: {
+        Row: {
+          id: number
+          name: string
+          category: string
+          quantity: number
+          unit: string
+          min_stock: number
+          cost_per_unit: number
+          notes: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: number
+          name: string
+          category?: string
+          quantity?: number
+          unit?: string
+          min_stock?: number
+          cost_per_unit?: number
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: number
+          name?: string
+          category?: string
+          quantity?: number
+          unit?: string
+          min_stock?: number
+          cost_per_unit?: number
+          notes?: string | null
+          updated_at?: string
+        }
+      }
     }
   }
 }

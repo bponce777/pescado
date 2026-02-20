@@ -4,20 +4,15 @@ interface FishLoaderProps {
 }
 
 export function FishLoader({ text = 'Cargando...', size = 'md' }: FishLoaderProps) {
-  const sizeClasses = {
-    sm: 'text-4xl',
-    md: 'text-6xl',
-    lg: 'text-8xl'
-  }
+  const ringSize = { sm: 'h-12 w-12', md: 'h-16 w-16', lg: 'h-24 w-24' }
+  const imgSize  = { sm: 'h-7 w-7',   md: 'h-10 w-10', lg: 'h-14 w-14' }
 
   return (
     <div className="flex flex-col items-center justify-center py-12">
-      <div className="relative">
-        <div className={`${sizeClasses[size]} animate-bounce`}>
-          🐟
-        </div>
+      <div className={`relative ${ringSize[size]}`}>
+        <div className="absolute inset-0 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin opacity-30"></div>
+          <img src="/logo.png" alt="" className={`${imgSize[size]} object-contain`} />
         </div>
       </div>
       {text && (
