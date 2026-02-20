@@ -10,7 +10,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
-import { FishLoader } from '@/components/FishLoader'
+import { InventarioSkeleton } from '@/components/PageSkeleton'
+import { Skeleton } from '@/components/ui/skeleton'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -259,14 +260,17 @@ export function Inventario() {
   // ─── Render ───────────────────────────────────────────────────────────────
 
   if (isLoading) {
-    return <FishLoader text="Cargando inventario..." />
+    return <InventarioSkeleton />
   }
 
   return (
     <>
       {isSaving && (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
-          <FishLoader text="Guardando..." size="lg" />
+          <div className="flex flex-col items-center gap-3">
+            <Skeleton className="h-16 w-16 rounded-full" />
+            <Skeleton className="h-4 w-24" />
+          </div>
         </div>
       )}
 

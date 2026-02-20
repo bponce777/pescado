@@ -1,12 +1,12 @@
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
-import { FishLoader } from '@/components/FishLoader'
+import { AuthSkeleton } from '@/components/PageSkeleton'
 
 export function AdminRoute({ children }: { children: React.ReactNode }) {
   const { user, profile, loading, isAdmin } = useAuth()
 
   if (loading) {
-    return <FishLoader text="Verificando permisos..." />
+    return <AuthSkeleton />
   }
 
   if (!user || !profile?.is_active) {

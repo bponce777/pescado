@@ -20,7 +20,7 @@ import { Toaster, toast } from 'sonner'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { supabase } from '@/lib/supabase'
-import { FishLoader } from '@/components/FishLoader'
+import { VentasSkeleton, PlatosSkeleton, ReportesSkeleton } from '@/components/PageSkeleton'
 import { BarChart, Bar, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 
 // Auth imports
@@ -673,7 +673,7 @@ function VentasPage() {
   }
 
   if (isLoading) {
-    return <FishLoader text="Cargando platos..." />
+    return <VentasSkeleton />
   }
 
   if (!selectedDish || dishes.length === 0) {
@@ -1102,7 +1102,7 @@ function PlatosPage() {
   }
 
   if (isLoading) {
-    return <FishLoader text="Cargando platos..." />
+    return <PlatosSkeleton />
   }
 
   return (
@@ -1622,7 +1622,7 @@ function ReportesPage() {
   const totalPendiente = filteredSales.reduce((sum, sale) => sum + sale.balance, 0)
 
   if (isLoading) {
-    return <FishLoader text="Cargando reportes..." />
+    return <ReportesSkeleton />
   }
 
   return (

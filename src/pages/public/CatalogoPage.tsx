@@ -4,7 +4,7 @@ import { Plus, Minus } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { supabase } from '@/lib/supabase'
-import { FishLoader } from '@/components/FishLoader'
+import { CatalogoSkeleton } from '@/components/PageSkeleton'
 import { toast } from 'sonner'
 
 interface Dish {
@@ -79,11 +79,7 @@ export default function CatalogoPage() {
   }
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-cyan-50">
-        <FishLoader />
-      </div>
-    )
+    return <CatalogoSkeleton />
   }
 
   return (
