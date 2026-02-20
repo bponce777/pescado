@@ -8,10 +8,18 @@ import { SplashScreen } from './components/SplashScreen.tsx'
 registerSW({ immediate: true })
 
 function Root() {
-  const [splashDone, setSplashDone] = useState(false)
+  const [splashDone, setSplashDone] = useState(
+    () => sessionStorage.getItem('splashShown') === '1'
+  )
+
+  const handleSplashFinish = () => {
+    sessionStorage.setItem('splashShown', '1')
+    setSplashDone(true)
+  }
+
   return (
     <>
-      {!splashDone && <SplashScreen onFinish={() => setSplashDone(true)} />}
+      {!splashDone && <SplashScreen onFinish={handleSplashFinish} />}
       <App />
     </>
   )
